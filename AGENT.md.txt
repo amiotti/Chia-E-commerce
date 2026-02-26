@@ -1,0 +1,187 @@
+# Agente Codex — Proyecto E-commerce (SPA) | Next + Node + InstantDB | ES/UTF-8 | The Season
+
+## Rol
+Sos un **agente full-stack** responsable de diseñar y construir una **tienda e-commerce** lista para producción, con foco en:
+- **Arquitectura SPA** en **Next.js** (App Router) con render cliente para la experiencia principal.
+- **Backend Node** (API Routes / server actions donde corresponda) y **Supabase** como base de datos.
+- **Registro/login de usuarios**, seguridad y buenas prácticas.
+- **Pagos**: tarjeta vía **Mercado Pago** y transferencias vía **Galio Pay**.
+- **Idioma**: todo en **español**, **UTF-8**, fechas y moneda en ARS (configurable).
+
+## Objetivo del proyecto
+Entregar un e-commerce con:
+- Home, catálogo, búsqueda, filtros, detalle de producto
+- Carrito, checkout, órdenes
+- Cuenta (perfil, direcciones, historial)
+- Panel admin básico (productos, stock, precios, órdenes)
+- Integración de pagos + webhooks
+- Seguridad (auth, autorización, validaciones, rate limiting, logs, secrets)
+
+## Stack y decisiones obligatorias
+- Front: **Next.js** (TypeScript), **SPA** (client components para las pantallas principales)
+- Back: **Node.js** (endpoints server-side en Next o server separado si el repo lo requiere)
+- DB: **Supabase**.Leer documentacion.
+- UI: Tailwind + componentes simples (sin sobreingeniería)
+- Fuente: **The Season** (Google Fonts o self-host, aplicado a headings y marca)
+- Formateo: Prettier + ESLint
+- Charset: **UTF-8** en todo (archivos, responses, headers)
+
+## Reglas de trabajo (muy importante)
+1. **Planificá y ejecutá en pasos pequeños**: no intentes hacer todo de una.
+2. **Cada cambio debe compilar y pasar tests básicos**.
+3. No hardcodear secretos: usar `.env.local` y `.env.example`.
+4. Escribir mensajes, UI y documentación en **español**.
+5. Validar inputs con esquema (ej. zod) en front y back.
+6. Loguear y manejar errores sin filtrar datos sensibles.
+7. Ningún dato de tarjeta se procesa en el server propio: solo tokenización/checkout con proveedor.
+
+## Alcance funcional (MVP)
+### Catálogo
+- Productos con: `id`, `slug`, `nombre`, `descripción`, `precio`, `moneda`, `imágenes`, `stock`, `categoría`, `tags`, `activo`
+- Listado con filtros por categoría, rango de precio, orden (precio / novedades)
+- Búsqueda por texto (nombre/tags)
+
+### Carrito & Checkout
+- Carrito persistido (localStorage) + sincronización si el usuario está logueado
+- Checkout con:
+  - Datos del comprador
+  - Dirección/envío (si aplica)
+  - Resumen de compra
+  - Selección método de pago:
+    - **Tarjeta (Mercado Pago)**
+    - **Transferencia (Galio Pay)**
+
+### Usuarios
+- Registro / login
+- Verificación de email (si el stack lo permite) o al menos confirmación básica
+- Recupero de contraseña (si aplica) o “magic link” (si el stack lo permite)
+- Roles: `user`, `admin`
+
+### Órdenes
+- Estados: `CREADA`, `PENDIENTE_PAGO`, `PAGADA`, `CANCELADA`, `REEMBOLSADA`
+- Guardar snapshot de items (precio al momento de compra)
+- Página de detalle de orden para usuario y admin
+
+### Admin (básico)
+- CRUD productos (con guardrails)
+- Gestión de stock/precio
+- Listado de órdenes + cambio de estado (con permisos)
+
+## Seguridad (checklist obligatorio)
+- **Auth**: sesiones seguras (httpOnly cookie si aplica)
+- **CSRF**: protección en endpoints sensibles (si hay cookies)
+- **CORS**: restringido
+- **Rate limiting**: login, registro, webhooks
+- **Validación**: zod en requests
+- **Autorización**: RBAC por rol, chequeo en servidor
+- **Webhooks**: verificación de firma/secret (Mercado Pago / Galio Pay)
+- **Idempotencia**: webhooks y creación de órdenes
+- **Headers**: security headers (CSP razonable, X-Content-Type-Options, etc.)
+- **Auditoría**: logs estructurados (sin PII sensible)
+
+## Integración de pagos
+### Mercado Pago (tarjetas).Leer documentacion.
+- Implementar flujo de pago recomendado por Mercado Pago:
+  - Crear preferencia/checkout desde servidor
+  - Redirigir/embebido según opción
+  - Recibir webhook de confirmación
+- Persistir `payment_provider`, `payment_id`, `payment_status`, `raw_event_id`
+
+### Galio Pay (transferencias). Leer documentacion.
+- Implementar creación de solicitud de transferencia/pago
+- Mostrar instrucciones y estado “pendiente”
+- Confirmación por webhook / conciliación
+- Persistir equivalentes a Mercado Pago
+
+> IMPORTANTE: si no existiera SDK oficial estable para Galio Pay en Node, implementar vía HTTP API con fetch, firmando requests según doc.
+
+## Modelo de datos (Supabase) — sugerido
+- `users`: id, email, password_hash (si aplica), role, created_at
+- `products`: id, slug, name, description, price_cents, currency, images[], stock, category, tags[], active
+- `carts`: id, user_id, items[{product_id, qty}], updated_at
+- `orders`: id, user_id, status, total_cents, currency, items_snapshot[], shipping, created_at
+- `payments`: id, order_id, provider, provider_payment_id, status, amount_cents, currency, created_at, last_event_id
+
+## Estructura de repo recomendada
+- `/apps/web` (Next)
+- `/apps/api` (Node) *(opcional; si no, API dentro de Next)*
+- `/packages/shared` (schemas zod, utils, tipos)
+
+## UI/UX (mínimo)
+- The Season en:
+  - Logo/brand
+  - Títulos (H1–H3)
+- Layout simple: navbar, search, categories, footer
+- Estados de carga y errores claros en español
+- Accesibilidad: labels, focus, aria en componentes críticos
+- Responsive paara moviles y desktop
+- Paleta de colores: #0B3816 #587055 #8BA37D #F0ECDF #B8858E
+- Usa los elementos de branding agregados en la carpeta /public/branding
+
+## Entregables
+1. Repo inicializado, corre con `pnpm dev`
+2. `.env.example` completo
+3. Documentación en `README.md`:
+   - Setup
+   - Scripts
+   - Config pagos (Mercado Pago / Galio Pay)
+   - Webhooks y pruebas locales
+4. MVP completo con seed de productos
+5. Suite mínima de tests:
+   - unit (schemas/utils)
+   - integración para endpoints críticos (checkout/webhooks)
+
+## Plan de ejecución (paso a paso)
+### Paso 0 — Bootstrap
+- Crear monorepo (pnpm workspaces) o repo simple (decidir)
+- Next + TS + Tailwind + ESLint/Prettier
+- Configurar fuente The Season
+
+### Paso 1 — Base de datos + Schemas
+- Definir schemas zod y tipos compartidos
+- Conectar InstantDB (clientes/credenciales)
+
+### Paso 2 — Catálogo
+- CRUD productos (admin) + listado público + detalle
+
+### Paso 3 — Auth
+- Registro/login/logout
+- RBAC en server
+
+### Paso 4 — Carrito + Órdenes
+- Carrito local + sync
+- Crear orden “pendiente pago”
+
+### Paso 5 — Pagos
+- Mercado Pago: crear checkout + webhook
+- Galio Pay: solicitud + webhook
+- Idempotencia y verificación de eventos
+
+### Paso 6 — Hardening
+- Rate limits, headers, logging, validaciones finales
+- Revisar permisos admin
+
+### Paso 7 — QA + Documentación
+- Scripts de prueba
+- Checklist de deploy
+
+## Estándares de código
+- TypeScript estricto
+- `src/` en cada app
+- Nombres claros en español para UI; código en inglés es aceptable pero consistente
+- Commits tipo: `feat:`, `fix:`, `chore:`
+
+## Comandos esperados
+- `pnpm install`
+- `pnpm dev`
+- `pnpm build`
+- `pnpm lint`
+- `pnpm test`
+
+## Prompt de arranque para Codex (usar tal cual)
+Construí el proyecto siguiendo TODO lo anterior.
+Primero generá la estructura base (Paso 0), asegurate de que corra y luego continuá incrementalmente.
+En cada etapa, indicá:
+- qué archivos creaste/modificaste
+- cómo probarlo localmente
+- qué falta para el siguiente paso

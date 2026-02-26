@@ -1,0 +1,58 @@
+import { productoSchema, type Producto } from "../schemas";
+
+const rawProductosSeed = [
+  {
+    id: "prod_aceite_chia_premium",
+    slug: "aceite-chia-premium",
+    nombre: "Aceite de chía premium",
+    descripcion: "Aceite prensado en frío, ideal para cocina y bienestar diario.",
+    precioCents: 1299000,
+    moneda: "ARS",
+    imagenes: ["https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=80"],
+    stock: 14,
+    categoria: "Alimentos",
+    tags: ["chia", "aceite", "premium"],
+    activo: true,
+  },
+  {
+    id: "prod_semillas_chia_organicas",
+    slug: "semillas-chia-organicas",
+    nombre: "Semillas de chía orgánicas",
+    descripcion: "Semillas seleccionadas para desayunos, licuados y preparaciones saludables.",
+    precioCents: 799000,
+    moneda: "ARS",
+    imagenes: ["https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80"],
+    stock: 32,
+    categoria: "Despensa",
+    tags: ["chia", "semillas", "orgánico"],
+    activo: true,
+  },
+  {
+    id: "prod_pack_bienestar_natural",
+    slug: "pack-bienestar-natural",
+    nombre: "Pack bienestar natural",
+    descripcion: "Combo de productos seleccionados para una rutina saludable completa.",
+    precioCents: 2199000,
+    moneda: "ARS",
+    imagenes: ["https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80"],
+    stock: 8,
+    categoria: "Combos",
+    tags: ["pack", "bienestar", "promo"],
+    activo: true,
+  },
+  {
+    id: "prod_harina_chia_integral",
+    slug: "harina-de-chia-integral",
+    nombre: "Harina de chía integral",
+    descripcion: "Harina fina para panificados y recetas sin refinados.",
+    precioCents: 649000,
+    moneda: "ARS",
+    imagenes: ["https://images.unsplash.com/photo-1515543904379-3d757afe72e4?auto=format&fit=crop&w=900&q=80"],
+    stock: 20,
+    categoria: "Despensa",
+    tags: ["harina", "chia", "integral"],
+    activo: true,
+  },
+] satisfies Producto[];
+
+export const productosSeed = rawProductosSeed.map((producto) => productoSchema.parse(producto));

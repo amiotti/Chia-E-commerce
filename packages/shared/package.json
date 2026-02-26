@@ -1,0 +1,17 @@
+{
+  "name": "@chia/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node -e \"console.log('Sin tests en Paso 1 (agregar unit tests de schemas en Paso 7)')\""
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  }
+}

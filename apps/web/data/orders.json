@@ -1,0 +1,31 @@
+[
+  {
+    "id": "ord_f9799c65-7d64-4621-895c-ef03cdaa08e6",
+    "userId": "9b0de11d-3d00-4139-99b1-c5719da69718",
+    "status": "PENDIENTE_PAGO",
+    "totalCents": 2598000,
+    "currency": "ARS",
+    "itemsSnapshot": [
+      {
+        "productId": "prod_aceite_chia_premium",
+        "slug": "aceite-chia-premium",
+        "nombre": "Aceite de chía premium",
+        "precioCents": 1299000,
+        "moneda": "ARS",
+        "qty": 2,
+        "subtotalCents": 2598000
+      }
+    ],
+    "shipping": {
+      "nombreCompleto": "amiotti",
+      "email": "amiotti@secco.com.ar",
+      "telefono": "03412114101",
+      "direccion": "Juan pablo II 5665",
+      "ciudad": "Rosario",
+      "provincia": "Santa Fe",
+      "codigoPostal": "2000",
+      "notas": ""
+    },
+    "createdAt": "2026-02-25T19:24:30.749Z"
+  }
+]

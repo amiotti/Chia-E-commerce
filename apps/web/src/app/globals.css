@@ -1,0 +1,272 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --chia-green-900: #0b3816;
+  --chia-green-700: #587055;
+  --chia-green-500: #8ba37d;
+  --chia-cream: #f0ecdf;
+  --chia-rose: #b8858e;
+  --font-brand: var(--font-the-seasons), "The Seasons", "The Season", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-ui: var(--font-along-sans), "Along Sans s2", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --bg-radial-a: rgba(184, 133, 142, 0.22);
+  --bg-radial-b: rgba(139, 163, 125, 0.25);
+  --bg-start: #f8f5ea;
+  --bg-end: var(--chia-cream);
+  --panel-bg: rgba(255, 255, 255, 0.72);
+  --panel-shadow-a: rgba(11, 56, 22, 0.08);
+  --panel-shadow-b: rgba(11, 56, 22, 0.04);
+  --grid-line: rgba(88, 112, 85, 0.06);
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html.theme-dark {
+  color-scheme: dark;
+  --bg-radial-a: rgba(184, 133, 142, 0.15);
+  --bg-radial-b: rgba(139, 163, 125, 0.12);
+  --bg-start: #06180d;
+  --bg-end: #0b3816;
+  --panel-bg: rgba(15, 33, 21, 0.72);
+  --panel-shadow-a: rgba(0, 0, 0, 0.34);
+  --panel-shadow-b: rgba(0, 0, 0, 0.22);
+  --grid-line: rgba(240, 236, 223, 0.05);
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-ui);
+  font-feature-settings: "kern" 1, "liga" 0, "calt" 0;
+  font-kerning: normal;
+  font-synthesis-style: none;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  background:
+    radial-gradient(circle at 10% 8%, var(--bg-radial-a), transparent 42%),
+    radial-gradient(circle at 88% 12%, var(--bg-radial-b), transparent 45%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+  color: var(--chia-green-900);
+}
+
+* {
+  border-color: rgba(88, 112, 85, 0.2);
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-ui);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+::selection {
+  background: rgba(184, 133, 142, 0.25);
+  color: var(--chia-green-900);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(88, 112, 85, 0.08);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(88, 112, 85, 0.75), rgba(139, 163, 125, 0.8));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fade-up-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translateY(0) rotate(var(--float-rot, 0deg));
+    }
+    50% {
+      transform: translateY(-8px) rotate(var(--float-rot, 0deg));
+    }
+  }
+}
+
+@layer utilities {
+  .font-brand {
+    font-family: var(--font-brand);
+    letter-spacing: 0.01em;
+  }
+
+  .panel-surface {
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 16px 45px var(--panel-shadow-a),
+      0 2px 8px var(--panel-shadow-b);
+  }
+
+  .bg-grid-soft {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+
+  .interactive-card {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  .interactive-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 22px 45px rgba(11, 56, 22, 0.14),
+      0 6px 18px rgba(11, 56, 22, 0.08);
+  }
+
+  .interactive-chip {
+    transition:
+      transform 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .interactive-chip:hover {
+    transform: translateY(-1px) scale(1.015);
+    box-shadow: 0 6px 16px rgba(11, 56, 22, 0.08);
+  }
+
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fade-up-in 560ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+
+  .reveal-delay-1 { animation-delay: 60ms; }
+  .reveal-delay-2 { animation-delay: 120ms; }
+  .reveal-delay-3 { animation-delay: 180ms; }
+  .reveal-delay-4 { animation-delay: 240ms; }
+
+  .floaty {
+    --float-rot: 0deg;
+    animation: float-slow 8s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .interactive-card,
+  .interactive-chip,
+  .theme-toggle {
+    transition: none !important;
+  }
+
+  .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .floaty {
+    animation: none !important;
+  }
+}
+
+/* Dark mode overrides for existing Tailwind arbitrary color classes */
+html.theme-dark body {
+  color: var(--chia-cream);
+}
+
+html.theme-dark ::selection {
+  background: rgba(184, 133, 142, 0.3);
+  color: var(--chia-cream);
+}
+
+html.theme-dark .theme-toggle {
+  background: rgba(20, 42, 27, 0.88) !important;
+  color: var(--chia-cream) !important;
+  border-color: rgba(139, 163, 125, 0.35) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+html.theme-dark [class*="text-[#0B3816]"] {
+  color: #f0ecdf !important;
+}
+
+html.theme-dark [class*="text-[#587055]"] {
+  color: #b4c7aa !important;
+}
+
+html.theme-dark [class*="bg-white/"] {
+  background-color: rgba(20, 42, 27, 0.78) !important;
+}
+
+html.theme-dark [class*="bg-[#F0ECDF]"] {
+  background-color: rgba(240, 236, 223, 0.08) !important;
+}
+
+html.theme-dark [class*="bg-[#0B3816]"] {
+  background-color: #8ba37d !important;
+}
+
+html.theme-dark [class*="text-[#F0ECDF]"] {
+  color: #08160d !important;
+}
+
+html.theme-dark [class*="border-[#587055]"] {
+  border-color: rgba(139, 163, 125, 0.25) !important;
+}
+
+html.theme-dark [class*="border-[#8BA37D]"] {
+  border-color: rgba(139, 163, 125, 0.38) !important;
+}
+
+html.theme-dark [class*="border-[#B8858E]"] {
+  border-color: rgba(184, 133, 142, 0.32) !important;
+}
+
+html.theme-dark [class*="ring-[#587055]"] {
+  --tw-ring-color: rgba(139, 163, 125, 0.25) !important;
+}
+
+html.theme-dark input,
+html.theme-dark textarea,
+html.theme-dark select {
+  color: #f0ecdf !important;
+  background-color: rgba(15, 33, 21, 0.9) !important;
+}
+
+html.theme-dark input::placeholder,
+html.theme-dark textarea::placeholder {
+  color: rgba(180, 199, 170, 0.72) !important;
+}

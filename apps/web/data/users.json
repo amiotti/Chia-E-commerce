@@ -1,0 +1,9 @@
+[
+  {
+    "id": "9b0de11d-3d00-4139-99b1-c5719da69718",
+    "email": "amiotti@secco.com.ar",
+    "passwordHash": "scrypt$d7a4d43625008e6cadb8ad04edb7ab18$d7797d616d41c9e663815ce93efaaa4f2ee313371efcee880bd96f0d1151c91a1b5a959775f06cc13b155f0c43bb180cac19b7b2038e94089f48aa4c7ef67b7f",
+    "role": "admin",
+    "createdAt": "2026-02-25T19:23:02.541Z"
+  }
+]
