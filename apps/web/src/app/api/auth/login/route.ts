@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildSessionPayload, setSessionCookie } from "@/lib/auth/session";
-import { verifyUserCredentials } from "@/lib/auth/store";
+import { loginWithSupabaseAuth } from "@/lib/auth/supabase-auth";
 import { rateLimit } from "@/lib/security/request";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const password = String(formData.get("password") ?? "");
   const redirectTo = String(formData.get("redirectTo") ?? "/cuenta");
 
-  const user = await verifyUserCredentials({ email, password });
+  const user = await loginWithSupabaseAuth({ email, password });
   if (!user) {
     const url = new URL("/cuenta/login", request.url);
     url.searchParams.set("error", "Credenciales inválidas.");

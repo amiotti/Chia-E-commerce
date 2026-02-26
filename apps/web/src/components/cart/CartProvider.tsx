@@ -19,6 +19,11 @@ type CartContextValue = {
   totalUnits: number;
 };
 
+type CartProviderProps = {
+  children: React.ReactNode;
+  initialSession?: SessionData | undefined;
+};
+
 const CART_STORAGE_KEY = "chia_cart_v1";
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -54,10 +59,10 @@ function writeLocalCart(items: CartItem[]) {
   window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizeCart(items)));
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({ children, initialSession }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [initialized, setInitialized] = useState(false);
-  const [session, setSession] = useState<SessionData>(null);
+  const [session, setSession] = useState<SessionData>(initialSession ?? null);
   const hasBootstrappedRef = useRef(false);
   const lastSyncedRef = useRef<string>("");
 
@@ -70,10 +75,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     void (async () => {
       try {
-        const sessionResponse = await fetch("/api/auth/session", { cache: "no-store" });
-        const sessionJson = (await sessionResponse.json()) as { session: SessionData };
-        const currentSession = sessionJson.session ?? null;
-        setSession(currentSession);
+        let currentSession = initialSession ?? null;
+        if (typeof initialSession === "undefined") {
+          const sessionResponse = await fetch("/api/auth/session", { cache: "no-store" });
+          const sessionJson = (await sessionResponse.json()) as { session: SessionData };
+          currentSession = sessionJson.session ?? null;
+          setSession(currentSession);
+        }
 
         if (currentSession) {
           const cartResponse = await fetch("/api/carrito", { cache: "no-store" });
@@ -97,7 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setInitialized(true);
       }
     })();
-  }, []);
+  }, [initialSession]);
 
   useEffect(() => {
     if (!initialized) return;

@@ -200,6 +200,17 @@ export default function HomePage() {
                 className="panel-surface interactive-card scroll-reveal reveal-delay-3 group relative overflow-hidden rounded-3xl border border-[#587055]/15 p-4"
               >
                 <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
+                  {producto.imagenes[0] ? (
+                    <Image
+                      src={producto.imagenes[0]}
+                      alt={producto.nombre}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      unoptimized
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B3816]/35 via-transparent to-transparent" />
                   <div
                     className={`absolute inset-x-0 top-0 h-1 ${
                       index % 3 === 0 ? "bg-[#587055]" : index % 3 === 1 ? "bg-[#8BA37D]" : "bg-[#B8858E]"
@@ -210,7 +221,7 @@ export default function HomePage() {
                     alt=""
                     width={768}
                     height={768}
-                    className="absolute -right-8 -top-10 w-40 opacity-[0.14] transition duration-300 group-hover:scale-105"
+                    className="absolute -right-8 -top-10 w-40 opacity-[0.1] transition duration-300 group-hover:scale-105"
                     aria-hidden="true"
                   />
                   <Image
@@ -218,12 +229,12 @@ export default function HomePage() {
                     alt=""
                     width={768}
                     height={768}
-                    className="absolute bottom-0 left-0 w-28 opacity-[0.15]"
+                    className="absolute bottom-0 left-0 w-28 opacity-[0.12]"
                     aria-hidden="true"
                   />
                   <div className="relative flex h-full flex-col justify-end p-4">
-                    <p className="text-xs uppercase tracking-[0.22em] text-[#587055]">{producto.categoria}</p>
-                    <h3 className="font-brand mt-2 text-2xl leading-tight text-[#0B3816]">{producto.nombre}</h3>
+                    <p className="text-xs uppercase tracking-[0.22em] text-[#F0ECDF]/90">{producto.categoria}</p>
+                    <h3 className="font-brand mt-2 text-2xl leading-tight text-[#F0ECDF]">{producto.nombre}</h3>
                   </div>
                 </div>
 
@@ -263,3 +274,5 @@ export default function HomePage() {
     </main>
   );
 }
+
+

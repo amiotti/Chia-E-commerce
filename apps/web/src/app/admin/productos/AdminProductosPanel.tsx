@@ -1,7 +1,7 @@
 "use client";
 
 import type { Producto } from "@chia/shared";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 type AdminProductosResponse = {
   items: Producto[];
@@ -21,8 +21,8 @@ const initialManualForm = {
   activo: true,
 };
 
-export default function AdminProductosPanel() {
-  const [items, setItems] = useState<Producto[]>([]);
+export default function AdminProductosPanel({ initialItems }: { initialItems: Producto[] }) {
+  const [items, setItems] = useState<Producto[]>(initialItems);
   const [manualForm, setManualForm] = useState(initialManualForm);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,10 +35,6 @@ export default function AdminProductosPanel() {
     const data = (await response.json()) as AdminProductosResponse;
     setItems(data.items ?? []);
   }
-
-  useEffect(() => {
-    void refreshProductos();
-  }, []);
 
   function clearAlerts() {
     setMensaje(null);
@@ -93,7 +89,7 @@ export default function AdminProductosPanel() {
         if (!response.ok || !data.ok) throw new Error(data.error ?? "No se pudo importar el archivo");
 
         setMensaje(
-          `ImportaciÃ³n ${data.result.mode}: ${data.result.importedCount} producto(s). Total en Supabase: ${data.result.totalAfter}.`,
+          `Importación ${data.result.mode}: ${data.result.importedCount} producto(s). Total en Supabase: ${data.result.totalAfter}.`,
         );
         setImportFile(null);
         const input = document.getElementById("archivo-productos") as HTMLInputElement | null;
@@ -109,7 +105,7 @@ export default function AdminProductosPanel() {
     <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
       <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
         <div className="mb-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">ImportaciÃ³n por archivo</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
           <h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Agregar producto</h2>
           <p className="mt-2 text-sm text-[#0B3816]/75">
             Guarda productos directamente en Supabase (`public.products`).
@@ -123,7 +119,7 @@ export default function AdminProductosPanel() {
               <input id="slug" value={manualForm.slug} onChange={(e) => setManualForm((p) => ({ ...p, slug: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
             </div>
             <div>
-              <label htmlFor="categoria" className="mb-1 block text-sm font-medium text-[#0B3816]">CategorÃ­a</label>
+              <label htmlFor="categoria" className="mb-1 block text-sm font-medium text-[#0B3816]">Categoría</label>
               <input id="categoria" value={manualForm.categoria} onChange={(e) => setManualForm((p) => ({ ...p, categoria: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
             </div>
           </div>
@@ -134,7 +130,7 @@ export default function AdminProductosPanel() {
           </div>
 
           <div>
-            <label htmlFor="descripcion" className="mb-1 block text-sm font-medium text-[#0B3816]">DescripciÃ³n</label>
+            <label htmlFor="descripcion" className="mb-1 block text-sm font-medium text-[#0B3816]">Descripción</label>
             <textarea id="descripcion" value={manualForm.descripcion} onChange={(e) => setManualForm((p) => ({ ...p, descripcion: e.target.value }))} rows={4} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
           </div>
 
@@ -154,7 +150,7 @@ export default function AdminProductosPanel() {
           </div>
 
           <div>
-            <label htmlFor="imagenes" className="mb-1 block text-sm font-medium text-[#0B3816]">ImÃ¡genes (URLs separadas por `|`)</label>
+            <label htmlFor="imagenes" className="mb-1 block text-sm font-medium text-[#0B3816]">Imágenes (URLs separadas por `|`)</label>
             <input id="imagenes" value={manualForm.imagenes} onChange={(e) => setManualForm((p) => ({ ...p, imagenes: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" />
           </div>
 
@@ -177,7 +173,7 @@ export default function AdminProductosPanel() {
       <div className="space-y-5">
         <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
           <div className="mb-4">
-            <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">ImportaciÃ³n por archivo</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
             <h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Cargar listado</h2>
             <p className="mt-2 text-sm text-[#0B3816]/75">Soporta `.json` (array) y `.csv`.</p>
           </div>
@@ -211,7 +207,7 @@ export default function AdminProductosPanel() {
         <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">ImportaciÃ³n por archivo</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
               <h2 className="font-brand text-2xl leading-tight text-[#0B3816]">{items.length} cargado(s)</h2>
             </div>
             <button type="button" onClick={() => void refreshProductos()} className="rounded-xl border border-[#587055]/20 bg-white/70 px-3 py-2 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">
@@ -224,14 +220,14 @@ export default function AdminProductosPanel() {
 
           <div className="max-h-[28rem] space-y-2 overflow-auto pr-1">
             {items.length === 0 ? (
-              <p className="text-sm text-[#0B3816]/70">TodavÃ­a no hay productos cargados en Supabase.</p>
+              <p className="text-sm text-[#0B3816]/70">Todavía no hay productos cargados en Supabase.</p>
             ) : (
               items.map((item) => (
                 <div key={item.id} className="rounded-2xl border border-[#587055]/10 bg-white/70 px-3 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-[#0B3816]">{item.nombre}</p>
-                      <p className="text-xs text-[#587055]">{item.slug} Â· {item.categoria}</p>
+                      <p className="text-xs text-[#587055]">{item.slug} · {item.categoria}</p>
                     </div>
                     <span className="rounded-full bg-[#F0ECDF] px-2 py-0.5 text-xs text-[#587055]">{item.stock} u.</span>
                   </div>

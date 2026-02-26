@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildSessionPayload, setSessionCookie } from "@/lib/auth/session";
-import { createUser } from "@/lib/auth/store";
+import { registerWithSupabaseAuth } from "@/lib/auth/supabase-auth";
 import { rateLimit } from "@/lib/security/request";
 
 export const runtime = "nodejs";
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const redirectTo = String(formData.get("redirectTo") ?? "/cuenta");
 
   try {
-    const user = await createUser({ email, password });
+    const user = await registerWithSupabaseAuth({ email, password });
     await setSessionCookie(buildSessionPayload(user));
 
     const url = new URL(redirectTo || "/cuenta", request.url);
@@ -26,9 +26,9 @@ export async function POST(request: Request) {
     }
     return NextResponse.redirect(url, { status: 303 });
   } catch (error) {
-    const loginUrl = new URL("/cuenta/registro", request.url);
-    loginUrl.searchParams.set("error", error instanceof Error ? error.message : "No se pudo registrar");
-    if (redirectTo) loginUrl.searchParams.set("redirectTo", redirectTo);
-    return NextResponse.redirect(loginUrl, { status: 303 });
+    const registerUrl = new URL("/cuenta/registro", request.url);
+    registerUrl.searchParams.set("error", error instanceof Error ? error.message : "No se pudo registrar");
+    if (redirectTo) registerUrl.searchParams.set("redirectTo", redirectTo);
+    return NextResponse.redirect(registerUrl, { status: 303 });
   }
 }

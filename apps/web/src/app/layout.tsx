@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { CartProvider } from "@/components/cart/CartProvider";
+import { getCurrentSession } from "@/lib/auth/session";
 import "./globals.css";
 
 const theSeasons = localFont({
@@ -92,15 +93,19 @@ export const metadata: Metadata = {
   description: "Tienda e-commerce SPA de CHIA Espacio Saludable",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getCurrentSession();
+
   return (
     <html lang="es" suppressHydrationWarning className={`${theSeasons.variable} ${alongSans.variable}`}>
       <body className="antialiased">
-        <CartProvider>{children}</CartProvider>
+        <CartProvider initialSession={session ? { userId: session.userId, email: session.email, role: session.role } : null}>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

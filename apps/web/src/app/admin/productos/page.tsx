@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { requireAdminPage } from "@/lib/auth/guards";
+import { readAdminProductos } from "@/lib/catalogo/admin-store";
 import AdminProductosPanel from "./AdminProductosPanel";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductosPage() {
   const session = await requireAdminPage("/admin/productos");
+  const initialItems = await readAdminProductos();
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-25">
@@ -32,7 +34,7 @@ export default async function AdminProductosPage() {
             </div>
           </div>
         </header>
-        <AdminProductosPanel />
+        <AdminProductosPanel initialItems={initialItems} />
       </div>
     </main>
   );
