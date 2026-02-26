@@ -28,7 +28,7 @@ MVP e-commerce de **CHÍA Espacio Saludable** construido por etapas con Next.js 
 
 ## Requisitos
 - `Node.js` 20+
-- `pnpm`
+- `npm`
 - Proyecto Supabase activo
 
 ## Variables de entorno
@@ -52,8 +52,8 @@ Variables principales:
 
 ## Instalación y desarrollo
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Abrir:
@@ -155,9 +155,9 @@ Y setear el mismo valor en:
 
 ## Comandos útiles
 ```bash
-pnpm build
-pnpm lint
-pnpm test
+npm run build
+npm run lint
+npm run test
 ```
 
 ## Branding / UI
@@ -169,7 +169,7 @@ pnpm test
 ## Troubleshooting rápido
 ### Error: `Supabase service role no está configurado`
 - verificar `SUPABASE_SERVICE_ROLE_KEY` en `apps/web/.env.local`
-- reiniciar `pnpm dev`
+- reiniciar `npm run dev`
 
 ### Catálogo vacío
 - revisar `public.products` en Supabase

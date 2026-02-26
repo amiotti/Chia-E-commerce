@@ -8,5 +8,5 @@ Esta carpeta deja preparado un punto de partida para el esquema del MVP.
 - Aplicar migraciones (CLI o SQL editor)
 
 ## Prueba local
-- Ejecutar `pnpm dev`
+- Ejecutar `npm run dev`
 - Abrir `/api/diagnostico/paso-1`

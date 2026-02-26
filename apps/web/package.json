@@ -10,7 +10,7 @@
     "test": "node -e \"console.log('Sin tests en Paso 1 (agregar integraciones en Paso 7)')\""
   },
   "dependencies": {
-    "@chia/shared": "workspace:*",
+    "@chia/shared": "file:../../packages/shared",
     "@supabase/supabase-js": "^2.57.4",
     "next": "16.1.0",
     "react": "19.2.0",
