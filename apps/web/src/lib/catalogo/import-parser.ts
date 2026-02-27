@@ -16,10 +16,7 @@ function parseBooleanLike(value: string | undefined) {
 
 function parseStringArrayCell(value: string | undefined) {
   if (!value) return [];
-  return value
-    .split(/[|;,]/g)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return value.split(/[|;,]/g).map((item) => item.trim()).filter(Boolean);
 }
 
 function parseNumberCell(value: string | undefined) {
@@ -39,12 +36,12 @@ function parseCsvLine(line: string) {
     const char = line[i];
     const next = line[i + 1];
 
-    if (char === "\"" && inQuotes && next === "\"") {
-      current += "\"";
+    if (char === '"' && inQuotes && next === '"') {
+      current += '"';
       i += 1;
       continue;
     }
-    if (char === "\"") {
+    if (char === '"') {
       inQuotes = !inQuotes;
       continue;
     }
@@ -63,14 +60,8 @@ function parseCsvLine(line: string) {
 type CsvRow = Record<string, string>;
 
 function parseCsv(text: string): CsvRow[] {
-  const lines = text
-    .replace(/^\uFEFF/, "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   if (lines.length === 0) return [];
-
   const headers = parseCsvLine(lines[0]);
   return lines.slice(1).map((line) => {
     const values = parseCsvLine(line);
@@ -101,6 +92,8 @@ function csvRowToProductoInput(row: CsvRow) {
     categoria: getRowValue(row, ["categoria", "categoría", "category"]),
     tags: parseStringArrayCell(getRowValue(row, ["tags"])),
     activo: parseBooleanLike(getRowValue(row, ["activo", "active"])) ?? true,
+    canjeConPuntos: parseBooleanLike(getRowValue(row, ["canjeConPuntos", "pointsEnabled", "canje_puntos", "points_enabled"])) ?? false,
+    puntosCanje: parseNumberCell(getRowValue(row, ["puntosCanje", "pointsCost", "points_cost", "puntos_canje"])),
   };
 }
 
@@ -118,34 +111,28 @@ function coerceJsonItem(item: unknown) {
     categoria: candidate.categoria ?? candidate.category,
     tags: candidate.tags ?? [],
     activo: candidate.activo ?? candidate.active ?? true,
+    canjeConPuntos: candidate.canjeConPuntos ?? candidate.pointsEnabled ?? candidate.points_enabled ?? false,
+    puntosCanje: candidate.puntosCanje ?? candidate.pointsCost ?? candidate.points_cost ?? null,
   };
 }
 
 function normalizeAndValidateItems(items: unknown[]): Producto[] {
   return items.map((item, index) => {
     const parsedCreate = productoCreateSchema.parse(item);
-    return productoSchema.parse({
-      id: createImportedId(index),
-      ...parsedCreate,
-    });
+    return productoSchema.parse({ id: createImportedId(index), ...parsedCreate });
   });
 }
 
 export function parseProductosImportFile(filename: string, text: string): Producto[] {
   const lowerName = filename.toLowerCase();
-
   if (lowerName.endsWith(".json")) {
     const json = JSON.parse(text);
-    if (!Array.isArray(json)) {
-      throw new Error("El archivo JSON debe contener un array de productos.");
-    }
+    if (!Array.isArray(json)) throw new Error("El archivo JSON debe contener un array de productos.");
     return normalizeAndValidateItems(json.map(coerceJsonItem));
   }
-
   if (lowerName.endsWith(".csv")) {
     const rows = parseCsv(text);
     return normalizeAndValidateItems(rows.map(csvRowToProductoInput));
   }
-
   throw new Error("Formato no soportado. Usá .json o .csv");
 }

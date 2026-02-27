@@ -19,6 +19,8 @@ const initialManualForm = {
   categoria: "",
   tags: "",
   activo: true,
+  canjeConPuntos: false,
+  puntosCanje: "",
 };
 
 export default function AdminProductosPanel({ initialItems }: { initialItems: Producto[] }) {
@@ -54,6 +56,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
             ...manualForm,
             precioCents: Number(manualForm.precioPesos),
             stock: Number(manualForm.stock),
+            puntosCanje: manualForm.puntosCanje ? Number(manualForm.puntosCanje) : null,
             imagenes: manualForm.imagenes.split(/[|;,]/g).map((v) => v.trim()).filter(Boolean),
             tags: manualForm.tags.split(/[|;,]/g).map((v) => v.trim()).filter(Boolean),
           }),
@@ -61,7 +64,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
         const data = await response.json();
         if (!response.ok) throw new Error(data.error ?? "No se pudo crear el producto");
 
-        setMensaje(`Producto creado: ${data.producto.nombre}`);
+        setMensaje(`Producto guardado: ${data.producto.nombre}`);
         setManualForm(initialManualForm);
         await refreshProductos();
       } catch (err) {
@@ -88,9 +91,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error ?? "No se pudo importar el archivo");
 
-        setMensaje(
-          `Importación ${data.result.mode}: ${data.result.importedCount} producto(s). Total en Supabase: ${data.result.totalAfter}.`,
-        );
+        setMensaje(`Importación ${data.result.mode}: ${data.result.importedCount} producto(s). Total en Supabase: ${data.result.totalAfter}.`);
         setImportFile(null);
         const input = document.getElementById("archivo-productos") as HTMLInputElement | null;
         if (input) input.value = "";
@@ -105,11 +106,9 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
     <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
       <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
         <div className="mb-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
-          <h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Agregar producto</h2>
-          <p className="mt-2 text-sm text-[#0B3816]/75">
-            Guarda productos directamente en Supabase (`public.products`).
-          </p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Gestión de catálogo</p>
+          <h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Agregar o actualizar producto</h2>
+          <p className="mt-2 text-sm text-[#0B3816]/75">Guardá productos en Supabase y definí cuáles participan del programa de puntos.</p>
         </div>
 
         <form onSubmit={handleManualSubmit} className="space-y-4">
@@ -149,6 +148,17 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
             </div>
           </div>
 
+          <div className="rounded-2xl border border-[#8BA37D]/30 bg-[#F0ECDF]/70 p-4">
+            <label className="flex items-center gap-2 text-sm text-[#0B3816]">
+              <input type="checkbox" checked={manualForm.canjeConPuntos} onChange={(e) => setManualForm((p) => ({ ...p, canjeConPuntos: e.target.checked, puntosCanje: e.target.checked ? p.puntosCanje : "" }))} className="h-4 w-4" />
+              Habilitar canje con puntos
+            </label>
+            <div className="mt-3 max-w-xs">
+              <label htmlFor="puntosCanje" className="mb-1 block text-sm font-medium text-[#0B3816]">Puntos requeridos</label>
+              <input id="puntosCanje" type="number" min={1} value={manualForm.puntosCanje} disabled={!manualForm.canjeConPuntos} onChange={(e) => setManualForm((p) => ({ ...p, puntosCanje: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none disabled:opacity-50 focus:border-[#587055]" />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="imagenes" className="mb-1 block text-sm font-medium text-[#0B3816]">Imágenes (URLs separadas por `|`)</label>
             <input id="imagenes" value={manualForm.imagenes} onChange={(e) => setManualForm((p) => ({ ...p, imagenes: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" />
@@ -175,7 +185,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
           <div className="mb-4">
             <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
             <h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Cargar listado</h2>
-            <p className="mt-2 text-sm text-[#0B3816]/75">Soporta `.json` (array) y `.csv`.</p>
+            <p className="mt-2 text-sm text-[#0B3816]/75">Soporta `.json` y `.csv`, incluyendo columnas de canje por puntos.</p>
           </div>
 
           <form onSubmit={handleImportSubmit} className="space-y-4">
@@ -197,9 +207,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
 
           <div className="mt-5 rounded-2xl border border-[#B8858E]/25 bg-[#B8858E]/10 p-4 text-sm text-[#0B3816]/85">
             <p className="font-medium">CSV esperado:</p>
-            <code className="mt-2 block overflow-x-auto rounded-xl bg-white/70 p-3 text-xs">
-              slug,nombre,descripcion,precioPesos,moneda,imagenes,stock,categoria,tags,activo
-            </code>
+            <code className="mt-2 block overflow-x-auto rounded-xl bg-white/70 p-3 text-xs">slug,nombre,descripcion,precioPesos,moneda,imagenes,stock,categoria,tags,activo,canjeConPuntos,puntosCanje</code>
             <p className="mt-2 text-xs text-[#587055]">`imagenes` y `tags`: separadores `|`, `;` o `,`.</p>
           </div>
         </section>
@@ -207,12 +215,10 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
         <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
-              <h2 className="font-brand text-2xl leading-tight text-[#0B3816]">{items.length} cargado(s)</h2>
+              <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Catálogo cargado</p>
+              <h2 className="font-brand text-2xl leading-tight text-[#0B3816]">{items.length} producto(s)</h2>
             </div>
-            <button type="button" onClick={() => void refreshProductos()} className="rounded-xl border border-[#587055]/20 bg-white/70 px-3 py-2 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">
-              Refrescar
-            </button>
+            <button type="button" onClick={() => void refreshProductos()} className="rounded-xl border border-[#587055]/20 bg-white/70 px-3 py-2 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">Refrescar</button>
           </div>
 
           {mensaje ? <div className="mb-3 rounded-xl border border-[#8BA37D]/30 bg-[#8BA37D]/12 px-3 py-2 text-sm text-[#0B3816]">{mensaje}</div> : null}
@@ -228,6 +234,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
                     <div>
                       <p className="font-medium text-[#0B3816]">{item.nombre}</p>
                       <p className="text-xs text-[#587055]">{item.slug} · {item.categoria}</p>
+                      {item.canjeConPuntos && item.puntosCanje ? <p className="mt-1 text-xs text-[#0B3816]/75">Canjeable por {item.puntosCanje} puntos</p> : null}
                     </div>
                     <span className="rounded-full bg-[#F0ECDF] px-2 py-0.5 text-xs text-[#587055]">{item.stock} u.</span>
                   </div>

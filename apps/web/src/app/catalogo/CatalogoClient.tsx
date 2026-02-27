@@ -6,284 +6,40 @@ import Link from "next/link";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import ProductImage from "@/components/product/ProductImage";
 
-type Props = {
-  allItems: Producto[];
-  categorias: string[];
-  initialFilters: ProductoFiltro;
-};
-const arsFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  maximumFractionDigits: 0,
-});
-
-function normalizeSearch(value?: string) {
-  return (
-    value
-      ?.trim()
-      .toLocaleLowerCase("es-AR")
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "") ?? ""
-  );
-}
-
+type Props = { allItems: Producto[]; categorias: string[]; initialFilters: ProductoFiltro };
+const arsFormatter = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+function normalizeSearch(value?: string) { return value?.trim().toLocaleLowerCase("es-AR").normalize("NFD").replace(/\p{Diacritic}/gu, "") ?? ""; }
 function applyFilters(items: Producto[], filters: ProductoFiltro) {
   let filtered = [...items].filter((producto) => producto.activo);
-
-  if (filters.categoria) {
-    const categoria = normalizeSearch(filters.categoria);
-    filtered = filtered.filter((producto) => normalizeSearch(producto.categoria) === categoria);
-  }
-  if (typeof filters.precioMinCents === "number") {
-    filtered = filtered.filter((producto) => producto.precioCents >= filters.precioMinCents!);
-  }
-  if (typeof filters.precioMaxCents === "number") {
-    filtered = filtered.filter((producto) => producto.precioCents <= filters.precioMaxCents!);
-  }
+  if (filters.categoria) filtered = filtered.filter((producto) => normalizeSearch(producto.categoria) === normalizeSearch(filters.categoria));
+  if (typeof filters.precioMinCents === "number") filtered = filtered.filter((producto) => producto.precioCents >= filters.precioMinCents);
+  if (typeof filters.precioMaxCents === "number") filtered = filtered.filter((producto) => producto.precioCents <= filters.precioMaxCents);
   if (filters.busqueda) {
     const query = normalizeSearch(filters.busqueda);
-    filtered = filtered.filter((producto) =>
-      normalizeSearch(producto.nombre).includes(query) ||
-      normalizeSearch(producto.descripcion).includes(query) ||
-      normalizeSearch(producto.categoria).includes(query) ||
-      normalizeSearch(producto.slug).includes(query) ||
-      producto.tags.some((tag) => normalizeSearch(tag).includes(query)),
-    );
+    filtered = filtered.filter((producto) => normalizeSearch(producto.nombre).includes(query) || normalizeSearch(producto.descripcion).includes(query) || normalizeSearch(producto.categoria).includes(query) || normalizeSearch(producto.slug).includes(query) || producto.tags.some((tag) => normalizeSearch(tag).includes(query)));
   }
-
   if (filters.orden === "precio_asc") filtered.sort((a, b) => a.precioCents - b.precioCents);
   if (filters.orden === "precio_desc") filtered.sort((a, b) => b.precioCents - a.precioCents);
   if (filters.orden === "novedades") filtered.sort((a, b) => b.id.localeCompare(a.id));
-
   return filtered;
 }
 
 export default function CatalogoClient({ allItems, categorias, initialFilters }: Props) {
   const [filters, setFilters] = useState<ProductoFiltro>(initialFilters);
   const deferredSearch = useDeferredValue(filters.busqueda ?? "");
-
-  const visibleItems = useMemo(() => {
-    return applyFilters(allItems, {
-      ...filters,
-      busqueda: deferredSearch,
-    });
-  }, [allItems, filters, deferredSearch]);
-
-  function updateFilter<K extends keyof ProductoFiltro>(key: K, value: ProductoFiltro[K]) {
-    startTransition(() => {
-      setFilters((current) => ({
-        ...current,
-        [key]: value,
-      }));
-    });
-  }
-
-  function clearFilters() {
-    startTransition(() => {
-      setFilters({});
-    });
-  }
+  const visibleItems = useMemo(() => applyFilters(allItems, { ...filters, busqueda: deferredSearch }), [allItems, filters, deferredSearch]);
+  function updateFilter<K extends keyof ProductoFiltro>(key: K, value: ProductoFiltro[K]) { startTransition(() => { setFilters((current) => ({ ...current, [key]: value })); }); }
+  function clearFilters() { startTransition(() => { setFilters({}); }); }
 
   return (
     <section className="mt-5 grid gap-5 lg:grid-cols-[18rem_1fr]">
       <aside className="panel-surface h-fit rounded-3xl border border-[#587055]/15 p-5">
-        <div className="mb-4 flex items-center gap-3">
-          <ProductImage src="/branding/logo-simplificado.png" alt="Simbolo CHIA" width={44} height={44} className="h-11 w-11 rounded-full" />
-          <div>
-            <h2 className="font-brand text-2xl leading-none text-[#0B3816]">Filtros</h2>
-            <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Elegi segun tu preferencia</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="busqueda" className="mb-1 block text-sm font-medium text-[#0B3816]">
-              Busqueda
-            </label>
-            <input
-              id="busqueda"
-              value={filters.busqueda ?? ""}
-              onChange={(event) => updateFilter("busqueda", event.target.value)}
-              placeholder="chia, semillas, sin tacc, keto..."
-              className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="categoria" className="mb-1 block text-sm font-medium text-[#0B3816]">
-              Categoria
-            </label>
-            <select
-              id="categoria"
-              value={filters.categoria ?? ""}
-              onChange={(event) => updateFilter("categoria", event.target.value || undefined)}
-              className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"
-            >
-              <option value="">Todas</option>
-              {categorias.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {categoria}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="precioMinCents" className="mb-1 block text-sm font-medium text-[#0B3816]">
-                Min (pesos)
-              </label>
-              <input
-                id="precioMinCents"
-                type="number"
-                min="0"
-                step="100"
-                value={filters.precioMinCents ?? ""}
-                onChange={(event) =>
-                  updateFilter(
-                    "precioMinCents",
-                    event.target.value ? Number(event.target.value) : undefined,
-                  )
-                }
-                className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"
-              />
-            </div>
-            <div>
-              <label htmlFor="precioMaxCents" className="mb-1 block text-sm font-medium text-[#0B3816]">
-                Max (pesos)
-              </label>
-              <input
-                id="precioMaxCents"
-                type="number"
-                min="0"
-                step="100"
-                value={filters.precioMaxCents ?? ""}
-                onChange={(event) =>
-                  updateFilter(
-                    "precioMaxCents",
-                    event.target.value ? Number(event.target.value) : undefined,
-                  )
-                }
-                className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="orden" className="mb-1 block text-sm font-medium text-[#0B3816]">
-              Orden
-            </label>
-            <select
-              id="orden"
-              value={filters.orden ?? ""}
-              onChange={(event) =>
-                updateFilter(
-                  "orden",
-                  event.target.value ? (event.target.value as ProductoFiltro["orden"]) : undefined,
-                )
-              }
-              className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"
-            >
-              <option value="">Relevancia</option>
-              <option value="novedades">Novedades</option>
-              <option value="precio_asc">Precio ascendente</option>
-              <option value="precio_desc">Precio descendente</option>
-            </select>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="flex-1 rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF]"
-            >
-              {visibleItems.length} resultado(s)
-            </button>
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-2.5 text-sm text-[#0B3816] hover:bg-[#F0ECDF]"
-            >
-              Limpiar
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-5 border-t border-[#587055]/10 pt-4">
-          <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#587055]">Accesos rapidos</p>
-          <div className="flex flex-wrap gap-2">
-            {categorias.map((categoria) => (
-              <button
-                key={categoria}
-                type="button"
-                onClick={() => updateFilter("categoria", categoria)}
-                className="rounded-full border border-[#8BA37D]/35 bg-[#F0ECDF] px-3 py-1.5 text-xs text-[#587055] hover:text-[#0B3816]"
-              >
-                {categoria}
-              </button>
-            ))}
-          </div>
-        </div>
+        <div className="mb-4 flex items-center gap-3"><ProductImage src="/branding/logo-simplificado.png" alt="Símbolo CHIA" width={44} height={44} className="h-11 w-11 rounded-full" /><div><h2 className="font-brand text-2xl leading-none text-[#0B3816]">Filtros</h2><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Elegí según tu preferencia</p></div></div>
+        <div className="space-y-4"><div><label htmlFor="busqueda" className="mb-1 block text-sm font-medium text-[#0B3816]">Búsqueda</label><input id="busqueda" value={filters.busqueda ?? ""} onChange={(event) => updateFilter("busqueda", event.target.value)} placeholder="chia, semillas, sin tacc, keto..." className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" /></div><div><label htmlFor="categoria" className="mb-1 block text-sm font-medium text-[#0B3816]">Categoría</label><select id="categoria" value={filters.categoria ?? ""} onChange={(event) => updateFilter("categoria", event.target.value || undefined)} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"><option value="">Todas</option>{categorias.map((categoria) => <option key={categoria} value={categoria}>{categoria}</option>)}</select></div><div className="grid grid-cols-2 gap-3"><div><label htmlFor="precioMinCents" className="mb-1 block text-sm font-medium text-[#0B3816]">Min (pesos)</label><input id="precioMinCents" type="number" min="0" step="100" value={filters.precioMinCents ?? ""} onChange={(event) => updateFilter("precioMinCents", event.target.value ? Number(event.target.value) : undefined)} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" /></div><div><label htmlFor="precioMaxCents" className="mb-1 block text-sm font-medium text-[#0B3816]">Max (pesos)</label><input id="precioMaxCents" type="number" min="0" step="100" value={filters.precioMaxCents ?? ""} onChange={(event) => updateFilter("precioMaxCents", event.target.value ? Number(event.target.value) : undefined)} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" /></div></div><div><label htmlFor="orden" className="mb-1 block text-sm font-medium text-[#0B3816]">Orden</label><select id="orden" value={filters.orden ?? ""} onChange={(event) => updateFilter("orden", event.target.value ? (event.target.value as ProductoFiltro["orden"]) : undefined)} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-[#587055]"><option value="">Relevancia</option><option value="novedades">Novedades</option><option value="precio_asc">Precio ascendente</option><option value="precio_desc">Precio descendente</option></select></div><div className="flex gap-2"><button type="button" className="flex-1 rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF]">{visibleItems.length} resultado(s)</button><button type="button" onClick={clearFilters} className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-2.5 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">Limpiar</button></div></div>
+        <div className="mt-5 border-t border-[#587055]/10 pt-4"><p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#587055]">Accesos rápidos</p><div className="flex flex-wrap gap-2">{categorias.map((categoria) => <button key={categoria} type="button" onClick={() => updateFilter("categoria", categoria)} className="rounded-full border border-[#8BA37D]/35 bg-[#F0ECDF] px-3 py-1.5 text-xs text-[#587055] hover:text-[#0B3816]">{categoria}</button>)}</div></div>
       </aside>
-
       <section>
-        {visibleItems.length === 0 ? (
-          <div className="panel-surface rounded-3xl border border-[#587055]/15 p-8 text-center">
-            <h2 className="font-brand text-3xl text-[#0B3816]">Sin resultados</h2>
-            <p className="mt-2 text-sm text-[#0B3816]/75">Proba con otro termino, categoria o rango de precio.</p>
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="mt-4 inline-flex rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]"
-            >
-              Ver catalogo completo
-            </button>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {visibleItems.map((producto) => (
-              <article key={producto.id} className="panel-surface group overflow-hidden rounded-3xl border border-[#587055]/15 p-3">
-                <Link href={`/catalogo/${producto.slug}`} className="block">
-                  <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
-                    <ProductImage
-                      src={producto.imagenes[0] ?? "/branding/logo-principal-verde.png"}
-                      alt={producto.nombre}
-                      fill
-                      className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                    />
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#587055] via-[#8BA37D] to-[#B8858E]" />
-                    <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-xs tracking-wide text-[#587055]">
-                      {producto.categoria}
-                    </span>
-                  </div>
-                </Link>
-                <h2 className="line-clamp-2 font-brand text-xl leading-tight text-[#0B3816]">
-                  <Link href={`/catalogo/${producto.slug}`}>{producto.nombre}</Link>
-                </h2>
-                <p className="mt-2 line-clamp-3 text-sm text-[#0B3816]/75">{producto.descripcion}</p>
-                <div className="mt-4">
-                  <p className="text-xl font-semibold text-[#0B3816]">
-                    {arsFormatter.format(producto.precioCents)}
-                  </p>
-                  <p className="text-xs text-[#587055]">Stock: {producto.stock}</p>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <AddToCartButton
-                    productId={producto.id}
-                    label="Agregar"
-                    className="rounded-2xl border border-[#587055]/20 bg-white/80 px-3 py-2 text-sm font-medium text-[#0B3816] transition hover:bg-[#F0ECDF]"
-                  />
-                  <Link
-                    href={`/catalogo/${producto.slug}`}
-                    className="rounded-2xl bg-[#0B3816] px-3 py-2 text-center text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]"
-                  >
-                    Ver
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+        {visibleItems.length === 0 ? <div className="panel-surface rounded-3xl border border-[#587055]/15 p-8 text-center"><h2 className="font-brand text-3xl text-[#0B3816]">Sin resultados</h2><p className="mt-2 text-sm text-[#0B3816]/75">Probá con otro término, categoría o rango de precio.</p><button type="button" onClick={clearFilters} className="mt-4 inline-flex rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]">Ver catálogo completo</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visibleItems.map((producto) => <article key={producto.id} className="panel-surface group overflow-hidden rounded-3xl border border-[#587055]/15 p-3"><Link href={`/catalogo/${producto.slug}`} className="block"><div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]"><ProductImage src={producto.imagenes[0] ?? "/branding/logo-principal-verde.png"} alt={producto.nombre} fill className="object-cover transition duration-300 group-hover:scale-[1.03]" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw" /><div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#587055] via-[#8BA37D] to-[#B8858E]" /><span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-xs tracking-wide text-[#587055]">{producto.categoria}</span>{producto.canjeConPuntos && producto.puntosCanje ? <span className="absolute bottom-3 left-3 rounded-full bg-[#0B3816]/85 px-2.5 py-1 text-xs tracking-wide text-[#F0ECDF]">{producto.puntosCanje} pts</span> : null}</div></Link><h2 className="line-clamp-2 font-brand text-xl leading-tight text-[#0B3816]"><Link href={`/catalogo/${producto.slug}`}>{producto.nombre}</Link></h2><p className="mt-2 line-clamp-3 text-sm text-[#0B3816]/75">{producto.descripcion}</p><div className="mt-4"><p className="text-xl font-semibold text-[#0B3816]">{arsFormatter.format(producto.precioCents)}</p><p className="text-xs text-[#587055]">Stock: {producto.stock}</p>{producto.canjeConPuntos && producto.puntosCanje ? <p className="mt-1 text-xs text-[#587055]">También disponible por {producto.puntosCanje} puntos</p> : null}</div><div className="mt-3 grid grid-cols-2 gap-2"><AddToCartButton productId={producto.id} label="Agregar" className="rounded-2xl border border-[#587055]/20 bg-white/80 px-3 py-2 text-sm font-medium text-[#0B3816] transition hover:bg-[#F0ECDF]" /><Link href={`/catalogo/${producto.slug}`} className="rounded-2xl bg-[#0B3816] px-3 py-2 text-center text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]">Ver</Link></div></article>)}</div>}
       </section>
     </section>
   );

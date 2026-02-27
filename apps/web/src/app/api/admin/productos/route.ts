@@ -18,14 +18,17 @@ const manualProductoPayloadSchema = z.object({
   categoria: z.string(),
   tags: z.array(z.string()).default([]),
   activo: z.boolean().default(true),
+  canjeConPuntos: z.boolean().default(false),
+  puntosCanje: z.coerce.number().int().positive().nullable().optional().transform((value) => value ?? null),
+}).superRefine((value, ctx) => {
+  if (value.canjeConPuntos && (!value.puntosCanje || value.puntosCanje <= 0)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["puntosCanje"], message: "Definí una cantidad de puntos válida para habilitar el canje." });
+  }
 });
 
 function parseMaybeArray(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return [];
-  return value
-    .split(/[|;,]/g)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return value.split(/[|;,]/g).map((item) => item.trim()).filter(Boolean);
 }
 
 export async function GET(request: Request) {
@@ -35,15 +38,9 @@ export async function GET(request: Request) {
   if (!auth.ok) return auth.response;
   try {
     const items = await readAdminProductos();
-    return NextResponse.json(
-      { items, total: items.length },
-      { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } },
-    );
+    return NextResponse.json({ items, total: items.length }, { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error al leer productos admin" },
-      { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Error al leer productos admin" }, { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } });
   }
 }
 
@@ -74,20 +71,15 @@ export async function POST(request: Request) {
         categoria: formData.get("categoria"),
         tags: parseMaybeArray(formData.get("tags")),
         activo: formData.get("activo") !== "false",
+        canjeConPuntos: formData.get("canjeConPuntos") === "true",
+        puntosCanje: formData.get("puntosCanje"),
       };
     }
 
     const parsed = manualProductoPayloadSchema.parse(payload);
     const producto = await createManualAdminProducto(parsed);
-
-    return NextResponse.json(
-      { ok: true, producto },
-      { status: 201, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
+    return NextResponse.json({ ok: true, producto }, { status: 201, headers: { "Content-Type": "application/json; charset=utf-8" } });
   } catch (error) {
-    return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "No se pudo crear el producto" },
-      { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "No se pudo crear el producto" }, { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } });
   }
 }

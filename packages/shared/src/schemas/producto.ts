@@ -7,13 +7,9 @@ export const productoIdSchema = z.union([
   z.string().min(1),
 ]);
 
-export const productoSchema = z.object({
+const productoBaseShape = {
   id: productoIdSchema,
-  slug: z
-    .string()
-    .trim()
-    .min(1)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug inválido"),
+  slug: z.string().trim().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug inválido"),
   nombre: nonEmptyTrimmedString,
   descripcion: nonEmptyTrimmedString,
   precioCents: z.number().int().nonnegative(),
@@ -23,13 +19,44 @@ export const productoSchema = z.object({
   categoria: nonEmptyTrimmedString,
   tags: optionalStringArraySchema,
   activo: z.boolean().default(true),
+  canjeConPuntos: z.boolean().default(false),
+  puntosCanje: z.number().int().positive().nullable().optional().transform((value) => value ?? null),
+} satisfies z.ZodRawShape;
+
+function withPointsValidation<T extends z.ZodTypeAny>(schema: T) {
+  return schema.superRefine((value: z.infer<T>, ctx) => {
+    const candidate = value as { canjeConPuntos?: boolean; puntosCanje?: number | null };
+    if (candidate.canjeConPuntos && (!candidate.puntosCanje || candidate.puntosCanje <= 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["puntosCanje"],
+        message: "Definí una cantidad de puntos válida para habilitar el canje.",
+      });
+    }
+  });
+}
+
+const productoObjectSchema = z.object(productoBaseShape);
+const productoCreateObjectSchema = z.object({
+  slug: productoBaseShape.slug,
+  nombre: productoBaseShape.nombre,
+  descripcion: productoBaseShape.descripcion,
+  precioCents: productoBaseShape.precioCents,
+  moneda: productoBaseShape.moneda,
+  imagenes: productoBaseShape.imagenes,
+  stock: productoBaseShape.stock,
+  categoria: productoBaseShape.categoria,
+  tags: productoBaseShape.tags,
+  activo: productoBaseShape.activo,
+  canjeConPuntos: productoBaseShape.canjeConPuntos,
+  puntosCanje: productoBaseShape.puntosCanje,
 });
 
-export const productoCreateSchema = productoSchema.omit({ id: true });
-
-export const productoUpdateSchema = productoCreateSchema.partial().extend({
+export const productoSchema = withPointsValidation(productoObjectSchema);
+export const productoCreateSchema = withPointsValidation(productoCreateObjectSchema);
+export const productoUpdateSchema = withPointsValidation(productoCreateObjectSchema.partial().extend({
   id: productoIdSchema,
-});
+}));
 
 export const productoFiltroSchema = z.object({
   busqueda: z.string().trim().optional(),

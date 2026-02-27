@@ -3,110 +3,26 @@ import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import CartLink from "@/components/cart/CartLink";
 import ProductImage from "@/components/product/ProductImage";
+import SiteHeader from "@/components/layout/SiteHeader";
 import { getCatalogoProductoBySlug, listCatalogoProductos } from "@/lib/catalogo/repository";
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
-const arsFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  maximumFractionDigits: 0,
-});
+type Props = { params: Promise<{ slug: string }> };
+const arsFormatter = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 
 export default async function ProductoDetallePage({ params }: Props) {
   const { slug } = await params;
   const producto = await getCatalogoProductoBySlug(slug);
   if (!producto) notFound();
-
-  const relacionados = (await listCatalogoProductos({ categoria: producto.categoria })).items
-    .filter((item) => item.slug !== producto.slug)
-    .slice(0, 3);
+  const relacionados = (await listCatalogoProductos({ categoria: producto.categoria })).items.filter((item) => item.slug !== producto.slug).slice(0, 3);
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-20">
-        <div className="bg-grid-soft h-full w-full" />
-      </div>
+      <div className="pointer-events-none absolute inset-0 opacity-20"><div className="bg-grid-soft h-full w-full" /></div>
       <div className="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="panel-surface mb-5 rounded-3xl border border-[#587055]/15 p-4 sm:p-5">
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <Link href="/" className="text-[#587055] hover:text-[#0B3816]">Inicio</Link>
-            <span className="text-[#587055]/60">/</span>
-            <Link href="/catalogo" className="text-[#587055] hover:text-[#0B3816]">Catálogo</Link>
-            <span className="text-[#587055]/60">/</span>
-            <span className="text-[#0B3816]">{producto.nombre}</span>
-            <span className="mx-1 hidden sm:inline text-[#587055]/40">•</span>
-            <CartLink className="rounded-full border border-[#587055]/20 bg-white/80 px-3 py-1 text-xs text-[#0B3816] hover:bg-[#F0ECDF]" />
-          </div>
-        </div>
-
-        <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="panel-surface overflow-hidden rounded-3xl border border-[#587055]/15 p-4">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
-              <ProductImage src={producto.imagenes[0]} alt={producto.nombre} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 55vw" priority unoptimized />
-            </div>
-          </div>
-
-          <aside className="panel-surface rounded-3xl border border-[#587055]/15 p-6">
-            <p className="text-xs uppercase tracking-[0.28em] text-[#587055]">{producto.categoria}</p>
-            <h1 className="font-brand mt-2 text-4xl leading-tight text-[#0B3816] sm:text-5xl">{producto.nombre}</h1>
-            <p className="mt-4 text-sm leading-relaxed text-[#0B3816]/78 sm:text-base">{producto.descripcion}</p>
-
-            <div className="mt-5 rounded-2xl border border-[#587055]/10 bg-white/70 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Precio</p>
-              <p className="mt-1 text-3xl font-semibold text-[#0B3816]">{arsFormatter.format(producto.precioCents)}</p>
-              <p className="mt-2 text-sm text-[#587055]">Stock disponible: {producto.stock}</p>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {producto.tags.map((tag) => (
-                <Link key={tag} href={`/catalogo?busqueda=${encodeURIComponent(tag)}`} className="rounded-full border border-[#8BA37D]/35 bg-[#F0ECDF] px-3 py-1.5 text-xs text-[#587055] hover:text-[#0B3816]">
-                  #{tag}
-                </Link>
-              ))}
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <AddToCartButton productId={producto.id} label="Agregar al carrito" className="rounded-2xl bg-[#0B3816] px-4 py-3 text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]" />
-              <Link href="/checkout" className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-3 text-center text-sm font-medium text-[#0B3816] hover:bg-[#F0ECDF]">
-                Ir al checkout
-              </Link>
-            </div>
-          </aside>
-        </section>
-
-        {relacionados.length > 0 ? (
-          <section className="mt-6">
-            <div className="mb-3 flex items-end justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-[#587055]">También te puede interesar</p>
-                <h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Más de {producto.categoria}</h2>
-              </div>
-              <Link href={`/catalogo?categoria=${encodeURIComponent(producto.categoria)}`} className="text-sm text-[#587055] hover:text-[#0B3816]">
-                Ver categoría completa
-              </Link>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              {relacionados.map((item) => (
-                <article key={item.id} className="panel-surface overflow-hidden rounded-3xl border border-[#587055]/15 p-4">
-                  <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
-                    <ProductImage src={item.imagenes[0]} alt={item.nombre} fill className="object-cover" unoptimized />
-                  </div>
-                  <h3 className="font-brand text-2xl leading-tight text-[#0B3816]">
-                    <Link href={`/catalogo/${item.slug}`}>{item.nombre}</Link>
-                  </h3>
-                  <p className="mt-2 text-sm text-[#0B3816]/75">{item.descripcion}</p>
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    <span className="font-semibold text-[#0B3816]">{arsFormatter.format(item.precioCents)}</span>
-                    <Link href={`/catalogo/${item.slug}`} className="rounded-xl bg-[#0B3816] px-3 py-2 text-sm text-[#F0ECDF] hover:bg-[#587055]">Ver detalle</Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        <SiteHeader current="catalogo" />
+        <div className="panel-surface mb-5 rounded-3xl border border-[#587055]/15 p-4 sm:p-5"><div className="flex flex-wrap items-center gap-2 text-sm"><Link href="/" className="text-[#587055] hover:text-[#0B3816]">Inicio</Link><span className="text-[#587055]/60">/</span><Link href="/catalogo" className="text-[#587055] hover:text-[#0B3816]">Catálogo</Link><span className="text-[#587055]/60">/</span><span className="text-[#0B3816]">{producto.nombre}</span><span className="mx-1 hidden text-[#587055]/40 sm:inline">•</span><CartLink className="rounded-full border border-[#587055]/20 bg-white/80 px-3 py-1 text-xs text-[#0B3816] hover:bg-[#F0ECDF]" /></div></div>
+        <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]"><div className="panel-surface overflow-hidden rounded-3xl border border-[#587055]/15 p-4"><div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]"><ProductImage src={producto.imagenes[0]} alt={producto.nombre} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 55vw" priority unoptimized /></div></div><aside className="panel-surface rounded-3xl border border-[#587055]/15 p-6"><p className="text-xs uppercase tracking-[0.28em] text-[#587055]">{producto.categoria}</p><h1 className="font-brand mt-2 text-4xl leading-tight text-[#0B3816] sm:text-5xl">{producto.nombre}</h1><p className="mt-4 text-sm leading-relaxed text-[#0B3816]/78 sm:text-base">{producto.descripcion}</p><div className="mt-5 rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Precio</p><p className="mt-1 text-3xl font-semibold text-[#0B3816]">{arsFormatter.format(producto.precioCents)}</p><p className="mt-2 text-sm text-[#587055]">Stock disponible: {producto.stock}</p>{producto.canjeConPuntos && producto.puntosCanje ? <p className="mt-3 rounded-xl bg-[#8BA37D]/15 px-3 py-2 text-sm text-[#0B3816]">También podés canjearlo por {producto.puntosCanje} puntos CHÍA.</p> : null}</div><div className="mt-5 flex flex-wrap gap-2">{producto.tags.map((tag) => <Link key={tag} href={`/catalogo?busqueda=${encodeURIComponent(tag)}`} className="rounded-full border border-[#8BA37D]/35 bg-[#F0ECDF] px-3 py-1.5 text-xs text-[#587055] hover:text-[#0B3816]">#{tag}</Link>)}</div><div className="mt-6 grid gap-3 sm:grid-cols-2"><AddToCartButton productId={producto.id} label="Agregar al carrito" className="rounded-2xl bg-[#0B3816] px-4 py-3 text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]" />{producto.canjeConPuntos && producto.puntosCanje ? <Link href="/cuenta/puntos" className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-3 text-center text-sm font-medium text-[#0B3816] hover:bg-[#F0ECDF]">Ver mis puntos</Link> : <Link href="/checkout" className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-3 text-center text-sm font-medium text-[#0B3816] hover:bg-[#F0ECDF]">Ir al checkout</Link>}</div></aside></section>
+        {relacionados.length > 0 ? <section className="mt-6"><div className="mb-3 flex items-end justify-between gap-3"><div><p className="text-xs uppercase tracking-[0.28em] text-[#587055]">También te puede interesar</p><h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Más de {producto.categoria}</h2></div><Link href={`/catalogo?categoria=${encodeURIComponent(producto.categoria)}`} className="text-sm text-[#587055] hover:text-[#0B3816]">Ver categoría completa</Link></div><div className="grid gap-4 md:grid-cols-3">{relacionados.map((item) => <article key={item.id} className="panel-surface overflow-hidden rounded-3xl border border-[#587055]/15 p-4"><div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]"><ProductImage src={item.imagenes[0]} alt={item.nombre} fill className="object-cover" unoptimized />{item.canjeConPuntos && item.puntosCanje ? <span className="absolute bottom-3 left-3 rounded-full bg-[#0B3816]/85 px-2.5 py-1 text-xs text-[#F0ECDF]">{item.puntosCanje} pts</span> : null}</div><h3 className="font-brand text-2xl leading-tight text-[#0B3816]"><Link href={`/catalogo/${item.slug}`}>{item.nombre}</Link></h3><p className="mt-2 text-sm text-[#0B3816]/75">{item.descripcion}</p><div className="mt-3 flex items-center justify-between gap-2"><span className="font-semibold text-[#0B3816]">{arsFormatter.format(item.precioCents)}</span><Link href={`/catalogo/${item.slug}`} className="rounded-xl bg-[#0B3816] px-3 py-2 text-sm text-[#F0ECDF] hover:bg-[#587055]">Ver detalle</Link></div></article>)}</div></section> : null}
       </div>
     </main>
   );
