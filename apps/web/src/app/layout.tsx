@@ -80,7 +80,7 @@ export default async function RootLayout({
             alt=""
             width={768}
             height={768}
-            className="floaty pointer-events-none fixed -left-16 top-28 hidden w-44 rotate-[-10deg] opacity-18 mix-blend-multiply dark:opacity-12 dark:mix-blend-screen sm:block md:-left-20 md:top-24 md:w-52 md:opacity-22 md:dark:opacity-14 lg:-left-24 lg:top-20 lg:w-60 lg:opacity-28 lg:dark:opacity-18 xl:-left-28 xl:w-72 xl:opacity-36 xl:dark:opacity-24"
+            className="floaty pointer-events-none fixed -left-12 top-36 w-28 rotate-[-10deg] opacity-16 mix-blend-multiply dark:opacity-14 dark:mix-blend-screen sm:-left-14 sm:top-32 sm:w-36 sm:opacity-18 md:-left-18 md:top-24 md:w-48 md:opacity-22 md:dark:opacity-16 lg:-left-24 lg:top-20 lg:w-60 lg:opacity-28 lg:dark:opacity-18 xl:-left-28 xl:w-72 xl:opacity-36 xl:dark:opacity-24"
             aria-hidden="true"
           />
           <Image
@@ -88,7 +88,7 @@ export default async function RootLayout({
             alt=""
             width={768}
             height={768}
-            className="floaty pointer-events-none fixed -right-10 top-20 hidden w-36 rotate-[10deg] opacity-16 mix-blend-multiply dark:opacity-10 dark:mix-blend-screen sm:block md:-right-12 md:top-16 md:w-44 md:opacity-20 md:dark:opacity-12 lg:-right-16 lg:top-12 lg:w-52 lg:opacity-24 lg:dark:opacity-16 xl:-right-20 xl:top-10 xl:w-64 xl:opacity-30 xl:dark:opacity-22"
+            className="floaty pointer-events-none fixed -right-6 top-20 w-24 rotate-[10deg] opacity-22 mix-blend-normal dark:opacity-18 dark:mix-blend-normal sm:-right-8 sm:top-18 sm:w-32 sm:opacity-24 md:-right-10 md:top-16 md:w-40 md:opacity-26 md:dark:opacity-22 lg:-right-16 lg:top-12 lg:w-52 lg:opacity-28 lg:dark:opacity-24 xl:-right-20 xl:top-10 xl:w-64 xl:opacity-32 xl:dark:opacity-28"
             aria-hidden="true"
           />
           <Image
@@ -96,7 +96,7 @@ export default async function RootLayout({
             alt=""
             width={768}
             height={768}
-            className="floaty pointer-events-none fixed bottom-6 right-[-2.75rem] w-36 opacity-18 mix-blend-multiply dark:opacity-14 dark:mix-blend-screen sm:bottom-8 sm:right-[-3.5rem] sm:w-44 sm:opacity-20 md:bottom-10 md:right-[-4.5rem] md:w-56 md:opacity-22 md:dark:opacity-16 lg:bottom-12 lg:right-[-6rem] lg:w-72 lg:opacity-25 lg:dark:opacity-18"
+            className="floaty pointer-events-none fixed bottom-4 right-[-2.5rem] w-28 opacity-16 mix-blend-multiply dark:opacity-14 dark:mix-blend-screen sm:bottom-6 sm:right-[-3rem] sm:w-36 sm:opacity-18 md:bottom-10 md:right-[-4.5rem] md:w-56 md:opacity-22 md:dark:opacity-16 lg:bottom-12 lg:right-[-6rem] lg:w-72 lg:opacity-25 lg:dark:opacity-18"
             aria-hidden="true"
           />
 
