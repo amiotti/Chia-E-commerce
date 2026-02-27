@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import SessionWatchdog from "@/components/auth/SessionWatchdog";
 import { CartProvider } from "@/components/cart/CartProvider";
+import RouteTransition from "@/components/layout/RouteTransition";
 import { getCurrentSession } from "@/lib/auth/session";
 import "./globals.css";
 
@@ -107,7 +108,7 @@ export default async function RootLayout({
       <body className="antialiased">
         <CartProvider initialSession={sessionData}>
           <SessionWatchdog enabled={Boolean(sessionData)} />
-          {children}
+          <RouteTransition>{children}</RouteTransition>
         </CartProvider>
       </body>
     </html>

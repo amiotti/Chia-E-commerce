@@ -28,7 +28,7 @@ export default async function CuentaPage({ searchParams }: { searchParams?: Sear
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-25"><div className="bg-grid-soft h-full w-full" /></div>
-      <div className="relative mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <SiteHeader current="cuenta" />
 
         <section className="panel-surface rounded-3xl border border-[#587055]/15 p-6 sm:p-7">
