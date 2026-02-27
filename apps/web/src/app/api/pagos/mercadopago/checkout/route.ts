@@ -38,15 +38,25 @@ export async function POST(request: Request) {
       rawPayload: null,
     });
 
-    const preferencePayload = {
-      external_reference: order.id,
-      items: order.itemsSnapshot.map((item) => ({
+    const preferenceItems = [
+      ...order.itemsSnapshot.map((item) => ({
         id: item.productId,
         title: item.nombre,
         quantity: item.qty,
         currency_id: order.currency,
         unit_price: Number(item.precioCents.toFixed(2)),
       })),
+      ...(order.shipping.serviceFeeCents > 0
+        ? [{ id: `${order.id}-service-fee`, title: "Costo de servicio", quantity: 1, currency_id: order.currency, unit_price: Number(order.shipping.serviceFeeCents.toFixed(2)) }]
+        : []),
+      ...(order.shipping.deliveryFeeCents > 0
+        ? [{ id: `${order.id}-delivery-fee`, title: "Envio", quantity: 1, currency_id: order.currency, unit_price: Number(order.shipping.deliveryFeeCents.toFixed(2)) }]
+        : []),
+    ];
+
+    const preferencePayload = {
+      external_reference: order.id,
+      items: preferenceItems,
       metadata: {
         order_id: order.id,
         payment_record_id: payment.id,

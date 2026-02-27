@@ -48,13 +48,23 @@ export async function POST(request: Request) {
       rawPayload: null,
     });
 
-    const candidatePayload = {
-      items: order.itemsSnapshot.map((item) => ({
+    const paymentItems = [
+      ...order.itemsSnapshot.map((item) => ({
         title: item.nombre,
         quantity: item.qty,
         unitPrice: Number(item.precioCents.toFixed(2)),
         currencyId: order.currency,
       })),
+      ...(order.shipping.serviceFeeCents > 0
+        ? [{ title: "Costo de servicio", quantity: 1, unitPrice: Number(order.shipping.serviceFeeCents.toFixed(2)), currencyId: order.currency }]
+        : []),
+      ...(order.shipping.deliveryFeeCents > 0
+        ? [{ title: "Envio", quantity: 1, unitPrice: Number(order.shipping.deliveryFeeCents.toFixed(2)), currencyId: order.currency }]
+        : []),
+    ];
+
+    const candidatePayload = {
+      items: paymentItems,
       referenceId: order.id,
       description: `Orden ${order.id} - CHIA`,
       backUrl: {
