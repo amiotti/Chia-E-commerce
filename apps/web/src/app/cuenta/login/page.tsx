@@ -14,11 +14,15 @@ export default async function LoginPage({ searchParams }: { searchParams?: Searc
   const redirectTo = pickString(params.redirectTo) ?? "/cuenta";
 
   return (
-    <CuentaAuthShell title="Ingresar" subtitle="Accedé a tu cuenta para guardar tus compras, revisar pedidos y continuar tu experiencia en CHÍA Espacio Saludable.">
+    <CuentaAuthShell
+      title="Ingresar"
+      subtitle="Accedé a tu cuenta para guardar tus compras, revisar pedidos y continuar tu experiencia en CHIA Espacio Saludable."
+    >
       <h2 className="font-brand text-3xl text-[#0B3816]">Login</h2>
       <p className="mt-2 text-sm text-[#0B3816]/75">Ingresá con tu email y contraseña para continuar tu compra.</p>
       {error ? <div className="mt-4 rounded-2xl border border-[#B8858E]/35 bg-[#B8858E]/12 px-4 py-3 text-sm text-[#0B3816]">{error}</div> : null}
       {logout === "ok" ? <div className="mt-4 rounded-2xl border border-[#8BA37D]/35 bg-[#8BA37D]/12 px-4 py-3 text-sm text-[#0B3816]">Sesión cerrada correctamente.</div> : null}
+      {logout === "idle" ? <div className="mt-4 rounded-2xl border border-[#B8858E]/35 bg-[#B8858E]/12 px-4 py-3 text-sm text-[#0B3816]">Tu sesión se cerró por inactividad.</div> : null}
       <form action="/api/auth/login" method="post" className="mt-5 space-y-4">
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <div><label htmlFor="email" className="mb-1 block text-sm font-medium text-[#0B3816]">Email</label><input id="email" name="email" type="email" required className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" /></div>
