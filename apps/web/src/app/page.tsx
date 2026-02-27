@@ -19,33 +19,7 @@ export default async function HomePage() {
       <div className="pointer-events-none absolute inset-0 opacity-35">
         <div className="bg-grid-soft h-full w-full" />
       </div>
-
-      <Image
-        src="/branding/ondas-verde-claro.png"
-        alt=""
-        width={768}
-        height={768}
-        className="floaty pointer-events-none absolute -left-36 top-20 hidden w-72 rotate-[-8deg] opacity-50 md:block"
-        aria-hidden="true"
-      />
-      <Image
-        src="/branding/hojas-rosa.png"
-        alt=""
-        width={768}
-        height={768}
-        className="floaty pointer-events-none absolute -right-24 top-8 hidden w-64 rotate-12 opacity-70 lg:block"
-        aria-hidden="true"
-      />
-      <Image
-        src="/branding/ondas-verde.png"
-        alt=""
-        width={768}
-        height={768}
-        className="floaty pointer-events-none absolute bottom-6 right-[-2.75rem] w-36 opacity-18 mix-blend-multiply dark:opacity-14 dark:mix-blend-screen sm:bottom-8 sm:right-[-3.5rem] sm:w-44 sm:opacity-20 md:bottom-10 md:right-[-4.5rem] md:w-56 md:opacity-22 md:dark:opacity-16 lg:bottom-12 lg:right-[-6rem] lg:w-72 lg:opacity-25 lg:dark:opacity-18"
-        aria-hidden="true"
-      />
-
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 pb-10 pt-4 sm:px-6 lg:px-8">
+<div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 pb-10 pt-4 sm:px-6 lg:px-8">
         <SiteHeader />
 
         <section className="scroll-reveal reveal-delay-1 mb-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
