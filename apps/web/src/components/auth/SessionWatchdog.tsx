@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
 const EVENTS = ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "click"] as const;
+const CART_STORAGE_KEY = "chia_cart_v1";
 
 async function requestLogout() {
   try {
@@ -15,6 +16,15 @@ async function requestLogout() {
       keepalive: true,
       cache: "no-store",
     });
+  } catch {
+    // no-op
+  }
+}
+
+function clearBrowserSessionState() {
+  try {
+    window.sessionStorage.removeItem(CART_STORAGE_KEY);
+    window.localStorage.removeItem(CART_STORAGE_KEY);
   } catch {
     // no-op
   }
@@ -39,6 +49,7 @@ export default function SessionWatchdog({ enabled }: { enabled: boolean }) {
       if (lockedRef.current) return;
       lockedRef.current = true;
       clearCurrentTimer();
+      clearBrowserSessionState();
       await requestLogout();
       router.replace(`/cuenta/login?logout=idle&from=${encodeURIComponent(pathname || "/")}`);
       router.refresh();
@@ -58,11 +69,19 @@ export default function SessionWatchdog({ enabled }: { enabled: boolean }) {
       }
     };
 
+    const handlePageHide = () => {
+      clearCurrentTimer();
+      clearBrowserSessionState();
+      void requestLogout();
+    };
+
     resetTimer();
     for (const eventName of EVENTS) {
       window.addEventListener(eventName, resetTimer, { passive: true });
     }
     document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handlePageHide);
 
     return () => {
       clearCurrentTimer();
@@ -70,6 +89,8 @@ export default function SessionWatchdog({ enabled }: { enabled: boolean }) {
         window.removeEventListener(eventName, resetTimer);
       }
       document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handlePageHide);
     };
   }, [enabled, pathname, router]);
 

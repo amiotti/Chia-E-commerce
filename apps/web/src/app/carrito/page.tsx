@@ -29,9 +29,6 @@ export default async function CarritoPage() {
               <Link href="/catalogo" className="rounded-full border border-[#8BA37D]/40 bg-white/70 px-4 py-2 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">
                 Seguir comprando
               </Link>
-              <Link href="/cuenta" className="rounded-full border border-[#587055]/20 bg-white/70 px-4 py-2 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">
-                Cuenta
-              </Link>
             </div>
           </div>
         </header>

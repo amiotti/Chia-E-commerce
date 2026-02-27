@@ -49,10 +49,10 @@ function mergeCarts(a: CartItem[], b: CartItem[]) {
   return [...map.entries()].map(([productId, qty]) => ({ productId, qty }));
 }
 
-function readLocalCart() {
+function readSessionCart() {
   if (typeof window === "undefined") return [] as CartItem[];
   try {
-    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(CART_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as CartItem[];
     return normalizeCart(parsed);
@@ -61,9 +61,15 @@ function readLocalCart() {
   }
 }
 
-function writeLocalCart(items: CartItem[]) {
+function writeSessionCart(items: CartItem[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizeCart(items)));
+  window.sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizeCart(items)));
+}
+
+function clearBrowserCartStorage() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(CART_STORAGE_KEY);
+  window.localStorage.removeItem(CART_STORAGE_KEY);
 }
 
 export function CartProvider({ children, initialSession }: CartProviderProps) {
@@ -74,10 +80,26 @@ export function CartProvider({ children, initialSession }: CartProviderProps) {
   const lastSyncedRef = useRef<string>("");
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handlePageHide = () => {
+      if (!session) {
+        clearBrowserCartStorage();
+      }
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+    };
+  }, [session]);
+
+  useEffect(() => {
     if (hasBootstrappedRef.current) return;
     hasBootstrappedRef.current = true;
 
-    const localItems = readLocalCart();
+    const localItems = readSessionCart();
+    clearBrowserCartStorage();
     setItems(localItems);
 
     void (async () => {
@@ -97,7 +119,7 @@ export function CartProvider({ children, initialSession }: CartProviderProps) {
             const remoteItems = normalizeCart(cartJson.cart?.items ?? []);
             const merged = mergeCarts(localItems, remoteItems);
             setItems(merged);
-            writeLocalCart(merged);
+            writeSessionCart(merged);
             await fetch("/api/carrito", {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
@@ -107,7 +129,7 @@ export function CartProvider({ children, initialSession }: CartProviderProps) {
           }
         }
       } catch {
-        // si falla red o auth, se mantiene el carrito del navegador hasta reintentar sync
+        // si falla red o auth, se mantiene el carrito de la sesion del navegador hasta reintentar sync
       } finally {
         setInitialized(true);
       }
@@ -116,7 +138,7 @@ export function CartProvider({ children, initialSession }: CartProviderProps) {
 
   useEffect(() => {
     if (!initialized) return;
-    writeLocalCart(items);
+    writeSessionCart(items);
     if (!session) return;
 
     const payload = JSON.stringify(normalizeCart(items));
@@ -128,7 +150,7 @@ export function CartProvider({ children, initialSession }: CartProviderProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items }),
     }).catch(() => {
-      // si falla el sync, conservamos temporalmente el carrito del navegador
+      // si falla el sync, conservamos temporalmente el carrito de la sesion del navegador
     });
   }, [items, session, initialized]);
 
