@@ -39,7 +39,14 @@ function normalizeCart(items: CartItem[]) {
 }
 
 function mergeCarts(a: CartItem[], b: CartItem[]) {
-  return normalizeCart([...a, ...b]);
+  const map = new Map<string, number>();
+  for (const item of [...a, ...b]) {
+    if (!item.productId) continue;
+    const qty = Number.isFinite(item.qty) ? Math.floor(item.qty) : 0;
+    if (qty <= 0) continue;
+    map.set(item.productId, Math.max(map.get(item.productId) ?? 0, qty));
+  }
+  return [...map.entries()].map(([productId, qty]) => ({ productId, qty }));
 }
 
 function readLocalCart() {

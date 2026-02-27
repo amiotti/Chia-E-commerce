@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import SessionWatchdog from "@/components/auth/SessionWatchdog";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { getCurrentSession } from "@/lib/auth/session";
 import "./globals.css";
@@ -99,11 +100,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getCurrentSession();
+  const sessionData = session ? { userId: session.userId, email: session.email, role: session.role } : null;
 
   return (
     <html lang="es" suppressHydrationWarning className={`${theSeasons.variable} ${alongSans.variable}`}>
       <body className="antialiased">
-        <CartProvider initialSession={session ? { userId: session.userId, email: session.email, role: session.role } : null}>
+        <CartProvider initialSession={sessionData}>
+          <SessionWatchdog enabled={Boolean(sessionData)} />
           {children}
         </CartProvider>
       </body>

@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { authSessionPayloadSchema, type AuthSessionPayload, type AuthUserStored } from "./types";
 
 export const AUTH_SESSION_COOKIE = "chia_session";
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+const SESSION_TTL_SECONDS = 60 * 15;
 
 function base64UrlEncode(input: string) {
   return Buffer.from(input, "utf8").toString("base64url");
@@ -65,7 +65,6 @@ export async function setSessionCookie(payload: AuthSessionPayload) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_TTL_SECONDS,
   });
 }
 
