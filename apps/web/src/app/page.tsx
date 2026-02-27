@@ -59,12 +59,11 @@ export default async function HomePage() {
               <span className="block text-[#B8858E]">para tu bienestar diario</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#0B3816]/80 sm:text-base">
-              En CHIA Espacio Saludable encontrás alimentos sin TACC, opciones keto, integrales, semillas,
-              suplementos y productos seleccionados para acompañar una alimentación consciente.
+              {"En CHIA Espacio Saludable encontr\u00e1s alimentos sin TACC, opciones keto, integrales, semillas, suplementos y productos seleccionados para acompa\u00f1ar una alimentaci\u00f3n consciente."}
             </p>
 
             <form action="/catalogo" method="get" className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
-              <label htmlFor="busqueda-home" className="sr-only">Buscar en el catálogo</label>
+              <label htmlFor="busqueda-home" className="sr-only">{"Buscar en el cat\u00e1logo"}</label>
               <input id="busqueda-home" name="busqueda" type="search" placeholder="Buscar semillas, suplementos, productos sin TACC o keto..." className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-3 text-sm text-[#0B3816] outline-none transition placeholder:text-[#587055]/70 focus:border-[#587055] focus:bg-white" />
               <div className="flex gap-2">
                 <button type="submit" className="interactive-chip inline-flex items-center justify-center rounded-2xl bg-[#0B3816] px-4 py-3 text-sm font-medium text-[#F0ECDF] transition hover:bg-[#587055] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8858E]">Buscar</button>
@@ -79,9 +78,9 @@ export default async function HomePage() {
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Selección</p><p className="mt-1 font-brand text-lg text-[#0B3816]">Productos naturales y funcionales</p></div>
-              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Especialidades</p><p className="mt-1 font-brand text-lg text-[#0B3816]">Sin TACC, keto, integral y más</p></div>
-              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Compra simple</p><p className="mt-1 font-brand text-lg text-[#0B3816]">Explorá, elegí y pagá online</p></div>
+              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">{"Selecci\u00f3n"}</p><p className="mt-1 font-brand text-lg text-[#0B3816]">Productos naturales y funcionales</p></div>
+              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Especialidades</p><p className="mt-1 font-brand text-lg text-[#0B3816]">{"Sin TACC, keto, integral y m\u00e1s"}</p></div>
+              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Compra simple</p><p className="mt-1 font-brand text-lg text-[#0B3816]">{"Explor\u00e1, eleg\u00ed y pag\u00e1 online"}</p></div>
             </div>
           </div>
 
@@ -91,25 +90,25 @@ export default async function HomePage() {
             <div className="mx-auto mb-5 max-w-[18rem]"><Image src="/branding/logo-principal-verde.png" alt="Logo principal CHIA Espacio Saludable" width={768} height={768} className="h-auto w-full" priority /></div>
             <h2 className="font-brand text-2xl text-[#0B3816]">Una tienda pensada para cuidarte</h2>
             <ul className="mt-3 space-y-2 text-sm text-[#0B3816]/80">
-              <li>Alimentos saludables para desayunos, snacks, cocina y suplementación.</li>
+              <li>{"Alimentos saludables para desayunos, snacks, cocina y suplementaci\u00f3n."}</li>
               <li>Opciones sin TACC, keto, integrales y naturales seleccionadas con criterio.</li>
-              <li>Semillas, harinas, aceites, mixes y suplementos para todos los días.</li>
-              <li>Una experiencia cálida, simple y alineada con el universo de CHIA.</li>
+              <li>{"Semillas, harinas, aceites, mixes y suplementos para todos los d\u00edas."}</li>
+              <li>{"Una experiencia c\u00e1lida, simple y alineada con el universo de CHIA."}</li>
             </ul>
             <div className="mt-5 rounded-2xl border border-[#B8858E]/25 bg-[#B8858E]/10 p-4">
               <p className="text-xs uppercase tracking-[0.22em] text-[#587055]">Nuestra propuesta</p>
-              <p className="mt-2 text-sm leading-relaxed text-[#0B3816]/80">Queremos acercarte productos nobles y prácticos para una alimentación más equilibrada, con categorías pensadas para quienes buscan bienestar, energía y opciones de calidad.</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#0B3816]/80">{"Queremos acercarte productos nobles y pr\u00e1cticos para una alimentaci\u00f3n m\u00e1s equilibrada, con categor\u00edas pensadas para quienes buscan bienestar, energ\u00eda y opciones de calidad."}</p>
             </div>
           </aside>
         </section>
 
         <section className="scroll-reveal reveal-delay-2 mb-6">
           <div className="mb-3 flex items-end justify-between gap-3">
-            <div><p className="text-xs uppercase tracking-[0.3em] text-[#587055]">Selección CHIA</p><h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Productos destacados</h2></div>
+            <div><p className="text-xs uppercase tracking-[0.3em] text-[#587055]">{"Selecci\u00f3n CHIA"}</p><h2 className="font-brand text-3xl leading-tight text-[#0B3816]">Productos destacados</h2></div>
             <div className="hidden items-center gap-2 rounded-full border border-[#8BA37D]/35 bg-white/65 px-3 py-1.5 text-xs text-[#587055] sm:flex"><span className="inline-block h-2 w-2 rounded-full bg-[#8BA37D]" />Elegidos para tu rutina saludable</div>
           </div>
           {featuredProducts.length === 0 ? (
-            <div className="panel-surface rounded-3xl border border-[#587055]/15 p-6 text-sm text-[#0B3816]/75">Todavía no hay productos destacados cargados en esta base.</div>
+            <div className="panel-surface rounded-3xl border border-[#587055]/15 p-6 text-sm text-[#0B3816]/75">{"Todav\u00eda no hay productos destacados cargados en esta base."}</div>
           ) : (
             <div className="grid gap-4 md:grid-cols-3">
               {featuredProducts.map((producto, index) => (
@@ -134,8 +133,8 @@ export default async function HomePage() {
 
         <footer className="panel-surface interactive-card scroll-reveal reveal-delay-4 rounded-3xl border border-[#587055]/15 p-4 sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3"><Image src="/branding/logo-simplificado.png" alt="Símbolo CHIA" width={48} height={48} className="h-10 w-10 rounded-full" /><div><p className="font-brand text-lg leading-none text-[#0B3816]">CHIA</p><p className="text-xs uppercase tracking-[0.26em] text-[#587055]">Espacio saludable</p></div></div>
-            <div className="text-sm text-[#0B3816]/75">Productos seleccionados para acompañar una vida más natural, práctica y consciente.</div>
+            <div className="flex items-center gap-3"><Image src="/branding/logo-simplificado.png" alt={"S\u00edmbolo CHIA"} width={48} height={48} className="h-10 w-10 rounded-full" /><div><p className="font-brand text-lg leading-none text-[#0B3816]">CHIA</p><p className="text-xs uppercase tracking-[0.26em] text-[#587055]">Espacio saludable</p></div></div>
+            <div className="text-sm text-[#0B3816]/75">{"Productos seleccionados para acompa\u00f1ar una vida m\u00e1s natural, pr\u00e1ctica y consciente."}</div>
           </div>
         </footer>
       </div>

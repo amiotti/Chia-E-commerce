@@ -7,7 +7,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 type NavKey = "catalogo" | "bienestar" | "cuenta";
 
 const navItems: Array<{ key: NavKey; label: string; href: string }> = [
-  { key: "catalogo", label: "Catalogo", href: "/catalogo" },
+  { key: "catalogo", label: "Cat\u00e1logo", href: "/catalogo" },
   { key: "bienestar", label: "Bienestar", href: "/bienestar" },
   { key: "cuenta", label: "Cuenta", href: "/cuenta" },
 ];

@@ -4,18 +4,18 @@ import SiteHeader from "@/components/layout/SiteHeader";
 
 const bienestarPillars = [
   {
-    title: "Alimentacion consciente",
-    description: "Opciones pensadas para sumar calidad a tu rutina, con ingredientes nobles y categorias funcionales.",
+    title: "Alimentaci\u00f3n consciente",
+    description: "Opciones pensadas para sumar calidad a tu rutina, con ingredientes nobles y categor\u00edas funcionales.",
     href: "/catalogo?busqueda=semillas",
   },
   {
     title: "Sin TACC y keto",
-    description: "Explora productos para necesidades especificas sin resignar sabor ni practicidad.",
+    description: "Explora productos para necesidades espec\u00edficas sin resignar sabor ni practicidad.",
     href: "/catalogo?busqueda=keto",
   },
   {
-    title: "Suplementos y energia",
-    description: "Encontra aliados para complementar tu dia con foco en bienestar y habitos sostenibles.",
+    title: "Suplementos y energ\u00eda",
+    description: "Encontr\u00e1 aliados para complementar tu d\u00eda con foco en bienestar y h\u00e1bitos sostenibles.",
     href: "/catalogo?busqueda=suplementos",
   },
 ];
@@ -34,15 +34,14 @@ export default function BienestarPage() {
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-[#587055]">Bienestar</p>
               <h1 className="font-brand mt-3 text-4xl leading-[0.95] text-[#0B3816] sm:text-5xl lg:text-6xl">
-                Pequenos habitos, grandes cambios
+                {"Peque\u00f1os h\u00e1bitos, grandes cambios"}
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#0B3816]/80 sm:text-base">
-                CHIA Espacio Saludable acompana una forma de alimentarte mas simple y consciente, con productos seleccionados
-                para sumar equilibrio, energia y practicidad a tu dia.
+                {"CHIA Espacio Saludable acompa\u00f1a una forma de alimentarte m\u00e1s simple y consciente, con productos seleccionados para sumar equilibrio, energ\u00eda y practicidad a tu d\u00eda."}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link href="/catalogo" className="rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]">
-                  Explorar catalogo
+                  {"Explorar cat\u00e1logo"}
                 </Link>
                 <Link href="/cuenta" className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-2.5 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">
                   Mi cuenta
@@ -71,14 +70,14 @@ export default function BienestarPage() {
         <section className="panel-surface mt-5 rounded-3xl border border-[#587055]/15 p-6">
           <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-[#587055]">Rutina diaria</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-[#587055]">{"Rutina diaria"}</p>
               <h2 className="font-brand mt-2 text-3xl leading-tight text-[#0B3816] sm:text-4xl">Ideas para sumar bienestar</h2>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">Desayunos nutritivos</p><p className="mt-2 text-sm text-[#0B3816]/75">Suma semillas, harinas integrales y mezclas funcionales a tus mananas.</p></div>
-              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">Snacks inteligentes</p><p className="mt-2 text-sm text-[#0B3816]/75">Elegi opciones practicas para sostener tu energia durante el dia.</p></div>
+              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">Desayunos nutritivos</p><p className="mt-2 text-sm text-[#0B3816]/75">{"Suma semillas, harinas integrales y mezclas funcionales a tus ma\u00f1anas."}</p></div>
+              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">Snacks inteligentes</p><p className="mt-2 text-sm text-[#0B3816]/75">{"Eleg\u00ed opciones pr\u00e1cticas para sostener tu energ\u00eda durante el d\u00eda."}</p></div>
               <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">Cocina sin resignar sabor</p><p className="mt-2 text-sm text-[#0B3816]/75">Explora alternativas sin TACC y keto con ingredientes nobles.</p></div>
-              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">Complementos diarios</p><p className="mt-2 text-sm text-[#0B3816]/75">Suplementos y productos funcionales para acompanar tus habitos.</p></div>
+              <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4"><p className="text-sm font-medium text-[#0B3816]">{"Complementos diarios"}</p><p className="mt-2 text-sm text-[#0B3816]/75">{"Suplementos y productos funcionales para acompa\u00f1ar tus h\u00e1bitos."}</p></div>
             </div>
           </div>
         </section>
