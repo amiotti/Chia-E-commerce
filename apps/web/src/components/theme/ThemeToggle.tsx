@@ -12,11 +12,19 @@ function applyTheme(mode: ThemeMode) {
   root.style.colorScheme = mode;
 }
 
-function readPreferredTheme(): ThemeMode {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+function resolveTheme(): ThemeMode {
+  if (typeof document !== "undefined") {
+    if (document.documentElement.classList.contains("theme-dark")) return "dark";
+    if (document.documentElement.style.colorScheme === "dark") return "dark";
+  }
+
+  if (typeof window !== "undefined") {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  return "light";
 }
 
 export default function ThemeToggle({
@@ -24,16 +32,7 @@ export default function ThemeToggle({
 }: {
   variant?: "floating" | "inline";
 }) {
-  // Keep SSR/first client render deterministic to avoid hydration mismatch.
-  const [mode, setMode] = useState<ThemeMode>("light");
-
-  useEffect(() => {
-    const preferred = readPreferredTheme();
-    applyTheme(preferred);
-    setTimeout(() => {
-      setMode((current) => (current === preferred ? current : preferred));
-    }, 0);
-  }, []);
+  const [mode, setMode] = useState<ThemeMode>(resolveTheme);
 
   useEffect(() => {
     applyTheme(mode);

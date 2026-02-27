@@ -154,3 +154,14 @@ export async function updateOrderStatus(id: string, status: z.infer<typeof order
   if (error) throw new Error(`Error actualizando estado de orden en Supabase: ${error.message}`);
   return getOrderById(id);
 }
+export async function listAllOrders() {
+  const client = requireSupabaseServiceClient() as any;
+  const { data, error } = await client
+    .from("orders")
+    .select("id, user_id, status, total_cents, currency, items_snapshot, shipping, created_at, updated_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Error listando ordenes en Supabase: ${error.message}`);
+  const parsed = z.array(supabaseOrderRowSchema).safeParse(data ?? []);
+  if (!parsed.success) throw new Error("Las ordenes en Supabase tienen formato invalido.");
+  return parsed.data.map(fromSupabaseOrderRow);
+}

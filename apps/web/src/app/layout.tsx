@@ -36,6 +36,23 @@ const alongSans = localFont({
   ],
 });
 
+const themeInitScript = `
+(function() {
+  try {
+    var storageKey = "chia_theme_mode";
+    var root = document.documentElement;
+    var stored = window.localStorage.getItem(storageKey);
+    var mode = stored === "dark" || stored === "light"
+      ? stored
+      : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    root.classList.toggle("theme-dark", mode === "dark");
+    root.style.colorScheme = mode;
+  } catch (error) {
+    document.documentElement.style.colorScheme = "light";
+  }
+})();
+`;
+
 export const metadata: Metadata = {
   title: "CHIA | Espacio Saludable",
   description: "Tienda e-commerce SPA de CHIA Espacio Saludable",
@@ -51,6 +68,9 @@ export default async function RootLayout({
 
   return (
     <html lang="es" suppressHydrationWarning className={`${theSeasons.variable} ${alongSans.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="antialiased">
         <CartProvider initialSession={sessionData}>
           <SessionWatchdog enabled={Boolean(sessionData)} />
