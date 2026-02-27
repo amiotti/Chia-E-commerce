@@ -1,3 +1,4 @@
+import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 import { buildSessionPayload, setSessionCookie } from "@/lib/auth/session";
 import { loginWithSupabaseAuth } from "@/lib/auth/supabase-auth";
@@ -5,6 +6,16 @@ import { rateLimit, requireSameOriginMutation, sanitizeRedirectPath } from "@/li
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+function getReadableError(error: unknown, fallback: string) {
+  if (error instanceof ZodError) {
+    return error.issues[0]?.message || fallback;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+}
 
 export async function POST(request: Request) {
   const originCheck = requireSameOriginMutation(request);
@@ -18,16 +29,23 @@ export async function POST(request: Request) {
   const password = String(formData.get("password") ?? "");
   const redirectTo = sanitizeRedirectPath(String(formData.get("redirectTo") ?? "/cuenta"), "/cuenta");
 
-  const user = await loginWithSupabaseAuth({ email, password });
-  if (!user) {
+  try {
+    const user = await loginWithSupabaseAuth({ email, password });
+    if (!user) {
+      const url = new URL("/cuenta/login", request.url);
+      url.searchParams.set("error", "Credenciales inválidas.");
+      if (redirectTo) url.searchParams.set("redirectTo", redirectTo);
+      return NextResponse.redirect(url, { status: 303 });
+    }
+
+    await setSessionCookie(buildSessionPayload(user));
+    const url = new URL(redirectTo || "/cuenta", request.url);
+    url.searchParams.set("login", "ok");
+    return NextResponse.redirect(url, { status: 303 });
+  } catch (error) {
     const url = new URL("/cuenta/login", request.url);
-    url.searchParams.set("error", "Credenciales inválidas.");
+    url.searchParams.set("error", getReadableError(error, "No se pudo iniciar sesión."));
     if (redirectTo) url.searchParams.set("redirectTo", redirectTo);
     return NextResponse.redirect(url, { status: 303 });
   }
-
-  await setSessionCookie(buildSessionPayload(user));
-  const url = new URL(redirectTo || "/cuenta", request.url);
-  url.searchParams.set("login", "ok");
-  return NextResponse.redirect(url, { status: 303 });
 }

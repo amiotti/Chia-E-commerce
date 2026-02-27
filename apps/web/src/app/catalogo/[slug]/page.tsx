@@ -1,14 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import CartLink from "@/components/cart/CartLink";
+import ProductImage from "@/components/product/ProductImage";
 import { getCatalogoProductoBySlug, listCatalogoProductos } from "@/lib/catalogo/repository";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
 const arsFormatter = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
@@ -45,7 +44,7 @@ export default async function ProductoDetallePage({ params }: Props) {
         <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="panel-surface overflow-hidden rounded-3xl border border-[#587055]/15 p-4">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
-              <Image src={producto.imagenes[0] ?? "/branding/logo-principal-verde.png"} alt={producto.nombre} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 55vw" priority />
+              <ProductImage src={producto.imagenes[0]} alt={producto.nombre} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 55vw" priority unoptimized />
             </div>
           </div>
 
@@ -93,7 +92,7 @@ export default async function ProductoDetallePage({ params }: Props) {
               {relacionados.map((item) => (
                 <article key={item.id} className="panel-surface overflow-hidden rounded-3xl border border-[#587055]/15 p-4">
                   <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
-                    <Image src={item.imagenes[0] ?? "/branding/logo-principal-verde.png"} alt={item.nombre} fill className="object-cover" />
+                    <ProductImage src={item.imagenes[0]} alt={item.nombre} fill className="object-cover" unoptimized />
                   </div>
                   <h3 className="font-brand text-2xl leading-tight text-[#0B3816]">
                     <Link href={`/catalogo/${item.slug}`}>{item.nombre}</Link>

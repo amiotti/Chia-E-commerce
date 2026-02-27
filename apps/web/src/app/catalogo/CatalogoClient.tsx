@@ -2,16 +2,15 @@
 
 import type { Producto, ProductoFiltro } from "@chia/shared";
 import { startTransition, useDeferredValue, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import ProductImage from "@/components/product/ProductImage";
 
 type Props = {
   allItems: Producto[];
   categorias: string[];
   initialFilters: ProductoFiltro;
 };
-
 const arsFormatter = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
@@ -89,7 +88,7 @@ export default function CatalogoClient({ allItems, categorias, initialFilters }:
     <section className="mt-5 grid gap-5 lg:grid-cols-[18rem_1fr]">
       <aside className="panel-surface h-fit rounded-3xl border border-[#587055]/15 p-5">
         <div className="mb-4 flex items-center gap-3">
-          <Image src="/branding/logo-simplificado.png" alt="Simbolo CHIA" width={44} height={44} className="h-11 w-11 rounded-full" />
+          <ProductImage src="/branding/logo-simplificado.png" alt="Simbolo CHIA" width={44} height={44} className="h-11 w-11 rounded-full" />
           <div>
             <h2 className="font-brand text-2xl leading-none text-[#0B3816]">Filtros</h2>
             <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Elegi segun tu preferencia</p>
@@ -245,7 +244,7 @@ export default function CatalogoClient({ allItems, categorias, initialFilters }:
               <article key={producto.id} className="panel-surface group overflow-hidden rounded-3xl border border-[#587055]/15 p-3">
                 <Link href={`/catalogo/${producto.slug}`} className="block">
                   <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-[#587055]/10 bg-[#F0ECDF]">
-                    <Image
+                    <ProductImage
                       src={producto.imagenes[0] ?? "/branding/logo-principal-verde.png"}
                       alt={producto.nombre}
                       fill

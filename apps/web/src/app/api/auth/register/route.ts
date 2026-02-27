@@ -1,3 +1,4 @@
+import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 import { buildSessionPayload, setSessionCookie } from "@/lib/auth/session";
 import { registerWithSupabaseAuth } from "@/lib/auth/supabase-auth";
@@ -5,6 +6,16 @@ import { rateLimit, requireSameOriginMutation, sanitizeRedirectPath } from "@/li
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+function getReadableError(error: unknown, fallback: string) {
+  if (error instanceof ZodError) {
+    return error.issues[0]?.message || fallback;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+}
 
 export async function POST(request: Request) {
   const originCheck = requireSameOriginMutation(request);
@@ -30,7 +41,7 @@ export async function POST(request: Request) {
     return NextResponse.redirect(url, { status: 303 });
   } catch (error) {
     const registerUrl = new URL("/cuenta/registro", request.url);
-    registerUrl.searchParams.set("error", error instanceof Error ? error.message : "No se pudo registrar");
+    registerUrl.searchParams.set("error", getReadableError(error, "No se pudo registrar"));
     if (redirectTo) registerUrl.searchParams.set("redirectTo", redirectTo);
     return NextResponse.redirect(registerUrl, { status: 303 });
   }

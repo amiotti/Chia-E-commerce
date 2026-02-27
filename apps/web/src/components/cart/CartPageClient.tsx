@@ -1,10 +1,9 @@
 "use client";
 
 import type { Producto } from "@chia/shared";
-import Image from "next/image";
 import Link from "next/link";
+import ProductImage from "@/components/product/ProductImage";
 import { enrichCartItems, useCart } from "./CartProvider";
-
 const arsFormatter = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
@@ -44,7 +43,7 @@ export default function CartPageClient({ products }: { products: Producto[] }) {
               <article key={item.productId} className="rounded-2xl border border-[#587055]/10 bg-white/70 p-3">
                 <div className="grid gap-3 sm:grid-cols-[5.5rem_1fr_auto] sm:items-center">
                   <div className="relative aspect-square overflow-hidden rounded-xl border border-[#587055]/10 bg-[#F0ECDF]">
-                    <Image src={item.product.imagenes[0] ?? "/branding/logo-principal-verde.png"} alt={item.product.nombre} fill className="object-cover" />
+                    <ProductImage src={item.product.imagenes[0]} alt={item.product.nombre} fill className="object-cover" unoptimized />
                   </div>
                   <div>
                     <Link href={`/catalogo/${item.product.slug}`} className="font-brand text-xl text-[#0B3816] hover:text-[#587055]">
