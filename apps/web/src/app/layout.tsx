@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import SessionWatchdog from "@/components/auth/SessionWatchdog";
@@ -109,6 +110,7 @@ export default async function RootLayout({
         <CartProvider initialSession={sessionData}>
           <SessionWatchdog enabled={Boolean(sessionData)} />
           <RouteTransition>{children}</RouteTransition>
+          <Analytics />
         </CartProvider>
       </body>
     </html>
