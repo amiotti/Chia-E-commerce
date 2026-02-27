@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import OrderPaymentActions from "@/components/payments/OrderPaymentActions";
 import SiteHeader from "@/components/layout/SiteHeader";
+import { canAccessOrder, requireAuthPage } from "@/lib/auth/guards";
 import { getOrderById } from "@/lib/commerce/orders-store";
 
 type Props = {
@@ -22,27 +24,13 @@ export const dynamic = "force-dynamic";
 
 export default async function OrdenDetallePage({ params, searchParams }: Props) {
   const { id } = await params;
+  const session = await requireAuthPage(`/ordenes/${id}`);
   const order = await getOrderById(id);
   const q = await Promise.resolve(searchParams ?? {});
   const creada = pick(q.creada) === "1";
 
-  if (!order) {
-    return (
-      <main className="relative min-h-screen overflow-hidden">
-        <div className="relative mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-          <SiteHeader />
-          <section className="panel-surface rounded-3xl border border-[#587055]/15 p-6">
-            <h1 className="font-brand text-4xl text-[#0B3816]">Orden no encontrada</h1>
-            <Link
-              href="/catalogo"
-              className="mt-4 inline-flex rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF] hover:bg-[#587055]"
-            >
-              Ir al catálogo
-            </Link>
-          </section>
-        </div>
-      </main>
-    );
+  if (!order || !canAccessOrder(session, order)) {
+    notFound();
   }
 
   return (

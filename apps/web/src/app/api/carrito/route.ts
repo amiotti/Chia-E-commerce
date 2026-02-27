@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getCurrentSession } from "@/lib/auth/session";
+import { requireAuthApi } from "@/lib/auth/guards";
 import { getCartByUserId, setCartByUserId } from "@/lib/commerce/carts-store";
 import { cartItemSchema } from "@/lib/commerce/types";
+import { rateLimit, requireSameOriginMutation } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,33 +13,29 @@ const cartUpdateSchema = z.object({
 });
 
 export async function GET() {
-  const session = await getCurrentSession();
-  if (!session) {
-    return NextResponse.json(
-      { ok: false, error: "No autenticado" },
-      { status: 401, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
-  }
+  const auth = await requireAuthApi();
+  if (!auth.ok) return auth.response;
 
-  const cart = await getCartByUserId(session.userId);
+  const cart = await getCartByUserId(auth.session.userId);
   return NextResponse.json(
-    { ok: true, cart: cart ?? { userId: session.userId, items: [], updatedAt: null } },
+    { ok: true, cart: cart ?? { userId: auth.session.userId, items: [], updatedAt: null } },
     { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } },
   );
 }
 
 export async function PUT(request: Request) {
-  const session = await getCurrentSession();
-  if (!session) {
-    return NextResponse.json(
-      { ok: false, error: "No autenticado" },
-      { status: 401, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
-  }
+  const originCheck = requireSameOriginMutation(request);
+  if (originCheck) return originCheck;
+
+  const limited = rateLimit(request, { namespace: "carrito:update", limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
+  const auth = await requireAuthApi();
+  if (!auth.ok) return auth.response;
 
   try {
     const payload = cartUpdateSchema.parse(await request.json());
-    const cart = await setCartByUserId(session.userId, payload.items);
+    const cart = await setCartByUserId(auth.session.userId, payload.items);
     return NextResponse.json(
       { ok: true, cart },
       { headers: { "Content-Type": "application/json; charset=utf-8" } },

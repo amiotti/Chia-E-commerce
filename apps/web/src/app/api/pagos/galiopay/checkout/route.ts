@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { canAccessOrder, requireAuthApi } from "@/lib/auth/guards";
 import { getOrderById } from "@/lib/commerce/orders-store";
 import { createPaymentRecord, updatePaymentRecord } from "@/lib/payments/store";
+import { rateLimit, requireSameOriginMutation } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,10 +13,21 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const originCheck = requireSameOriginMutation(request);
+  if (originCheck) return originCheck;
+
+  const limited = rateLimit(request, { namespace: "pagos:galiopay:checkout", limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
+  const auth = await requireAuthApi();
+  if (!auth.ok) return auth.response;
+
   try {
     const { orderId } = bodySchema.parse(await request.json());
     const order = await getOrderById(orderId);
-    if (!order) return NextResponse.json({ ok: false, error: "Orden no encontrada" }, { status: 404 });
+    if (!order || !canAccessOrder(auth.session, order)) {
+      return NextResponse.json({ ok: false, error: "Orden no encontrada" }, { status: 404 });
+    }
 
     const apiBase = process.env.GALIOPAY_API_BASE_URL?.trim();
     const apiKey = process.env.GALIOPAY_API_KEY?.trim();

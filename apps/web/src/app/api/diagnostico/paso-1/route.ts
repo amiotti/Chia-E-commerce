@@ -1,11 +1,15 @@
 import { productosSeed } from "@chia/shared";
 import { NextResponse } from "next/server";
 import { maskSecret, readSupabaseEnv } from "@/lib/env.server";
+import { denyInProductionRoute } from "@/lib/security/request";
 import { getSupabaseHealthSnapshot } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const blocked = denyInProductionRoute();
+  if (blocked) return blocked;
+
   const { data, status } = readSupabaseEnv();
   const health = getSupabaseHealthSnapshot();
 

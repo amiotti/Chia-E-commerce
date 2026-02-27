@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { maskSecret, readSupabaseEnv } from "@/lib/env.server";
+import { denyInProductionRoute } from "@/lib/security/request";
 import { getSupabaseHealthSnapshot, requireSupabaseServiceClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -53,6 +54,9 @@ function readPaymentsEnv() {
 }
 
 export async function GET() {
+  const blocked = denyInProductionRoute();
+  if (blocked) return blocked;
+
   const supabaseEnv = readSupabaseEnv();
   const health = getSupabaseHealthSnapshot();
 
@@ -104,4 +108,3 @@ export async function GET() {
     },
   );
 }
-

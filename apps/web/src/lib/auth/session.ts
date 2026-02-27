@@ -15,7 +15,12 @@ function base64UrlDecode(input: string) {
 }
 
 function getSessionSecret() {
-  return process.env.SESSION_SECRET?.trim() || "dev-only-insecure-session-secret-change-me";
+  const secret = process.env.SESSION_SECRET?.trim() || "";
+  if (secret.length >= 32) return secret;
+  if (process.env.NODE_ENV !== "production") {
+    return "dev-only-insecure-session-secret-change-me";
+  }
+  throw new Error("SESSION_SECRET no está configurado o es demasiado corto para producción.");
 }
 
 function sign(value: string) {
@@ -65,6 +70,7 @@ export async function setSessionCookie(payload: AuthSessionPayload) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    priority: "high",
   });
 }
 
@@ -75,6 +81,7 @@ export async function clearSessionCookie() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    priority: "high",
     maxAge: 0,
   });
 }

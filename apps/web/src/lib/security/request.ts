@@ -94,3 +94,20 @@ export function requireWebhookSharedSecret(request: Request, secretEnvValue: str
   return null;
 }
 
+export function sanitizeRedirectPath(input: string | null | undefined, fallback = "/") {
+  if (!input) return fallback;
+  const value = input.trim();
+  if (!value.startsWith("/")) return fallback;
+  if (value.startsWith("//")) return fallback;
+  return value;
+}
+
+export function denyInProductionRoute() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { ok: false, error: "No disponible." },
+      { status: 404, headers: { "Content-Type": "application/json; charset=utf-8" } },
+    );
+  }
+  return null;
+}
