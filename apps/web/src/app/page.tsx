@@ -22,7 +22,24 @@ export default async function HomePage() {
 <div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 pb-10 pt-4 sm:px-6 lg:px-8">
         <SiteHeader />
 
-        <section className="scroll-reveal reveal-delay-1 mb-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <section className="scroll-reveal reveal-delay-1 mb-6 grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+          <aside className="panel-surface interactive-card relative overflow-hidden rounded-3xl border border-[#587055]/15 p-6">
+            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#B8858E]/15 blur-xl" />
+            <div className="absolute -left-6 bottom-10 h-20 w-20 rounded-full bg-[#8BA37D]/20 blur-xl" />
+            <div className="mx-auto mb-5 max-w-[18rem]"><Image src="/branding/logo-principal-verde.png" alt="Logo principal CHIA Espacio Saludable" width={768} height={768} className="h-auto w-full" priority /></div>
+            <h2 className="font-brand text-2xl text-[#0B3816]">Una tienda pensada para cuidarte</h2>
+            <ul className="mt-3 space-y-2 text-sm text-[#0B3816]/80">
+              <li>{"Alimentos saludables para desayunos, snacks, cocina y suplementaci\u00f3n."}</li>
+              <li>Opciones sin TACC, keto, integrales y naturales seleccionadas con criterio.</li>
+              <li>{"Semillas, harinas, aceites, mixes y suplementos para todos los d\u00edas."}</li>
+              <li>{"Una experiencia c\u00e1lida, simple y alineada con el universo de CHIA."}</li>
+            </ul>
+            <div className="mt-5 rounded-2xl border border-[#B8858E]/25 bg-[#B8858E]/10 p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-[#587055]">Nuestra propuesta</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#0B3816]/80">{"Queremos acercarte productos nobles y pr\u00e1cticos para una alimentaci\u00f3n m\u00e1s equilibrada, con categor\u00edas pensadas para quienes buscan bienestar, energ\u00eda y opciones de calidad."}</p>
+            </div>
+          </aside>
+
           <div className="panel-surface interactive-card relative overflow-hidden rounded-3xl border border-[#587055]/15 p-6 sm:p-7">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#8BA37D] via-[#B8858E] to-[#587055]" />
             <Image src="/branding/ondas-verde.png" alt="" width={768} height={768} className="pointer-events-none absolute -right-20 top-4 w-56 opacity-[0.09]" aria-hidden="true" />
@@ -57,23 +74,6 @@ export default async function HomePage() {
               <div className="rounded-2xl border border-[#587055]/10 bg-white/70 px-4 py-3"><p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Compra simple</p><p className="mt-1 font-brand text-lg text-[#0B3816]">{"Explor\u00e1, eleg\u00ed y pag\u00e1 online"}</p></div>
             </div>
           </div>
-
-          <aside className="panel-surface interactive-card relative overflow-hidden rounded-3xl border border-[#587055]/15 p-6">
-            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#B8858E]/15 blur-xl" />
-            <div className="absolute -left-6 bottom-10 h-20 w-20 rounded-full bg-[#8BA37D]/20 blur-xl" />
-            <div className="mx-auto mb-5 max-w-[18rem]"><Image src="/branding/logo-principal-verde.png" alt="Logo principal CHIA Espacio Saludable" width={768} height={768} className="h-auto w-full" priority /></div>
-            <h2 className="font-brand text-2xl text-[#0B3816]">Una tienda pensada para cuidarte</h2>
-            <ul className="mt-3 space-y-2 text-sm text-[#0B3816]/80">
-              <li>{"Alimentos saludables para desayunos, snacks, cocina y suplementaci\u00f3n."}</li>
-              <li>Opciones sin TACC, keto, integrales y naturales seleccionadas con criterio.</li>
-              <li>{"Semillas, harinas, aceites, mixes y suplementos para todos los d\u00edas."}</li>
-              <li>{"Una experiencia c\u00e1lida, simple y alineada con el universo de CHIA."}</li>
-            </ul>
-            <div className="mt-5 rounded-2xl border border-[#B8858E]/25 bg-[#B8858E]/10 p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[#587055]">Nuestra propuesta</p>
-              <p className="mt-2 text-sm leading-relaxed text-[#0B3816]/80">{"Queremos acercarte productos nobles y pr\u00e1cticos para una alimentaci\u00f3n m\u00e1s equilibrada, con categor\u00edas pensadas para quienes buscan bienestar, energ\u00eda y opciones de calidad."}</p>
-            </div>
-          </aside>
         </section>
 
         <section className="scroll-reveal reveal-delay-2 mb-6">
