@@ -23,9 +23,12 @@ function normalizeSearch(value?: string) {
 
 function applyFilters(items: Producto[], filters: ProductoFiltro) {
   let filtered = [...items].filter((producto) => producto.activo);
-  if (filters.categoria) filtered = filtered.filter((producto) => normalizeSearch(producto.categoria) === normalizeSearch(filters.categoria));
-  if (typeof filters.precioMinCents === "number") filtered = filtered.filter((producto) => producto.precioCents >= filters.precioMinCents);
-  if (typeof filters.precioMaxCents === "number") filtered = filtered.filter((producto) => producto.precioCents <= filters.precioMaxCents);
+  const categoria = filters.categoria;
+  const precioMinCents = filters.precioMinCents;
+  const precioMaxCents = filters.precioMaxCents;
+  if (categoria) filtered = filtered.filter((producto) => normalizeSearch(producto.categoria) === normalizeSearch(categoria));
+  if (typeof precioMinCents === "number") filtered = filtered.filter((producto) => producto.precioCents >= precioMinCents);
+  if (typeof precioMaxCents === "number") filtered = filtered.filter((producto) => producto.precioCents <= precioMaxCents);
   if (filters.busqueda) {
     const query = normalizeSearch(filters.busqueda);
     filtered = filtered.filter((producto) => normalizeSearch(producto.nombre).includes(query) || normalizeSearch(producto.descripcion).includes(query) || normalizeSearch(producto.categoria).includes(query) || normalizeSearch(producto.slug).includes(query) || producto.tags.some((tag) => normalizeSearch(tag).includes(query)));
