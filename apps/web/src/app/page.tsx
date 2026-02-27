@@ -41,7 +41,7 @@ export default async function HomePage() {
         alt=""
         width={768}
         height={768}
-        className="floaty pointer-events-none absolute bottom-12 right-[-7rem] hidden w-80 opacity-25 md:block"
+        className="floaty pointer-events-none absolute bottom-6 right-[-2.75rem] w-36 opacity-18 mix-blend-multiply dark:opacity-14 dark:mix-blend-screen sm:bottom-8 sm:right-[-3.5rem] sm:w-44 sm:opacity-20 md:bottom-10 md:right-[-4.5rem] md:w-56 md:opacity-22 md:dark:opacity-16 lg:bottom-12 lg:right-[-6rem] lg:w-72 lg:opacity-25 lg:dark:opacity-18"
         aria-hidden="true"
       />
 
