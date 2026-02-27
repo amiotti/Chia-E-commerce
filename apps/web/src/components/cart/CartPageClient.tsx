@@ -50,7 +50,7 @@ export default function CartPageClient({ products }: { products: Producto[] }) {
                     <Link href={`/catalogo/${item.product.slug}`} className="font-brand text-xl text-[#0B3816] hover:text-[#587055]">
                       {item.product.nombre}
                     </Link>
-                    <p className="text-sm text-[#587055]">{arsFormatter.format(item.product.precioCents / 100)} c/u</p>
+                    <p className="text-sm text-[#587055]">{arsFormatter.format(item.product.precioCents)} c/u</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <label className="text-xs text-[#587055]">
@@ -63,7 +63,7 @@ export default function CartPageClient({ products }: { products: Producto[] }) {
                         className="mt-1 block w-20 rounded-xl border border-[#8BA37D]/45 bg-white px-3 py-1.5 text-sm text-[#0B3816]"
                       />
                     </label>
-                    <p className="text-sm font-medium text-[#0B3816]">{arsFormatter.format(item.subtotalCents / 100)}</p>
+                    <p className="text-sm font-medium text-[#0B3816]">{arsFormatter.format(item.subtotalCents)}</p>
                     <button type="button" onClick={() => removeItem(item.productId)} className="text-xs text-[#B8858E] hover:underline">
                       Quitar
                     </button>
@@ -89,7 +89,7 @@ export default function CartPageClient({ products }: { products: Producto[] }) {
           </div>
           <div className="mt-2 flex justify-between gap-3 border-t border-[#587055]/10 pt-3 text-[#0B3816]">
             <span className="font-medium">Total</span>
-            <span className="font-semibold">{arsFormatter.format(totalCents / 100)}</span>
+            <span className="font-semibold">{arsFormatter.format(totalCents)}</span>
           </div>
         </div>
 

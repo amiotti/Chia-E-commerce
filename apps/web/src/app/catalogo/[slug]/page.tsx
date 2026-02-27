@@ -56,7 +56,7 @@ export default async function ProductoDetallePage({ params }: Props) {
 
             <div className="mt-5 rounded-2xl border border-[#587055]/10 bg-white/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Precio</p>
-              <p className="mt-1 text-3xl font-semibold text-[#0B3816]">{arsFormatter.format(producto.precioCents / 100)}</p>
+              <p className="mt-1 text-3xl font-semibold text-[#0B3816]">{arsFormatter.format(producto.precioCents)}</p>
               <p className="mt-2 text-sm text-[#587055]">Stock disponible: {producto.stock}</p>
             </div>
 
@@ -100,7 +100,7 @@ export default async function ProductoDetallePage({ params }: Props) {
                   </h3>
                   <p className="mt-2 text-sm text-[#0B3816]/75">{item.descripcion}</p>
                   <div className="mt-3 flex items-center justify-between gap-2">
-                    <span className="font-semibold text-[#0B3816]">{arsFormatter.format(item.precioCents / 100)}</span>
+                    <span className="font-semibold text-[#0B3816]">{arsFormatter.format(item.precioCents)}</span>
                     <Link href={`/catalogo/${item.slug}`} className="rounded-xl bg-[#0B3816] px-3 py-2 text-sm text-[#F0ECDF] hover:bg-[#587055]">Ver detalle</Link>
                   </div>
                 </article>

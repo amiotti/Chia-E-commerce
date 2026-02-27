@@ -1,9 +1,22 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { type CartItem, createOrderRequestSchema, orderSchema, orderStatusSchema, type Order } from "./types";
 import { listCatalogoProductos } from "@/lib/catalogo/repository";
 import { requireSupabaseServiceClient } from "@/lib/supabase/server";
+
+function padDatePart(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function createOrderId(date = new Date()) {
+  return [
+    date.getFullYear(),
+    padDatePart(date.getMonth() + 1),
+    padDatePart(date.getDate()),
+    padDatePart(date.getHours()),
+    padDatePart(date.getMinutes()),
+  ].join("");
+}
 
 function normalizeCartItems(items: CartItem[]) {
   const byProduct = new Map<string, number>();
@@ -75,15 +88,24 @@ export async function createPendingOrder(input: unknown, userId: string | null) 
 
   if (itemsSnapshot.length === 0) throw new Error("No hay items válidos para crear la orden.");
 
-  const totalCents = itemsSnapshot.reduce((sum, item) => sum + item.subtotalCents, 0);
+  const itemsTotalCents = itemsSnapshot.reduce((sum, item) => sum + item.subtotalCents, 0);
+  const serviceFeeCents = Math.round(itemsTotalCents * 0.05);
+  const deliveryFeeCents = parsed.shipping.fulfillmentType === "envio" ? Math.round(itemsTotalCents * 0.05) : 0;
+  const totalCents = itemsTotalCents + serviceFeeCents + deliveryFeeCents;
+
   const order = orderSchema.parse({
-    id: `ord_${randomUUID()}`,
+    id: createOrderId(),
     userId,
     status: "PENDIENTE_PAGO",
     totalCents,
     currency: "ARS",
     itemsSnapshot,
-    shipping: parsed.shipping,
+    shipping: {
+      ...parsed.shipping,
+      itemsTotalCents,
+      serviceFeeCents,
+      deliveryFeeCents,
+    },
     createdAt: new Date().toISOString(),
   });
 

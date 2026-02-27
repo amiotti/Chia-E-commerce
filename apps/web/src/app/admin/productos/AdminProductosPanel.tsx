@@ -12,7 +12,7 @@ const initialManualForm = {
   slug: "",
   nombre: "",
   descripcion: "",
-  precioCents: "",
+  precioPesos: "",
   moneda: "ARS",
   imagenes: "",
   stock: "",
@@ -52,7 +52,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...manualForm,
-            precioCents: Number(manualForm.precioCents),
+            precioCents: Number(manualForm.precioPesos),
             stock: Number(manualForm.stock),
             imagenes: manualForm.imagenes.split(/[|;,]/g).map((v) => v.trim()).filter(Boolean),
             tags: manualForm.tags.split(/[|;,]/g).map((v) => v.trim()).filter(Boolean),
@@ -136,8 +136,8 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label htmlFor="precioCents" className="mb-1 block text-sm font-medium text-[#0B3816]">Precio (centavos)</label>
-              <input id="precioCents" type="number" min={0} value={manualForm.precioCents} onChange={(e) => setManualForm((p) => ({ ...p, precioCents: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
+              <label htmlFor="precioPesos" className="mb-1 block text-sm font-medium text-[#0B3816]">Precio (pesos)</label>
+              <input id="precioPesos" type="number" min={0} value={manualForm.precioPesos} onChange={(e) => setManualForm((p) => ({ ...p, precioPesos: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
             </div>
             <div>
               <label htmlFor="stock" className="mb-1 block text-sm font-medium text-[#0B3816]">Stock</label>
@@ -198,7 +198,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
           <div className="mt-5 rounded-2xl border border-[#B8858E]/25 bg-[#B8858E]/10 p-4 text-sm text-[#0B3816]/85">
             <p className="font-medium">CSV esperado:</p>
             <code className="mt-2 block overflow-x-auto rounded-xl bg-white/70 p-3 text-xs">
-              slug,nombre,descripcion,precioCents,moneda,imagenes,stock,categoria,tags,activo
+              slug,nombre,descripcion,precioPesos,moneda,imagenes,stock,categoria,tags,activo
             </code>
             <p className="mt-2 text-xs text-[#587055]">`imagenes` y `tags`: separadores `|`, `;` o `,`.</p>
           </div>

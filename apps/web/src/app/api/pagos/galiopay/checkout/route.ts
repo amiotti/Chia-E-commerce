@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       items: order.itemsSnapshot.map((item) => ({
         title: item.nombre,
         quantity: item.qty,
-        unitPrice: Number((item.precioCents / 100).toFixed(2)),
+        unitPrice: Number(item.precioCents.toFixed(2)),
         currencyId: order.currency,
       })),
       referenceId: order.id,

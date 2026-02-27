@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         title: item.nombre,
         quantity: item.qty,
         currency_id: order.currency,
-        unit_price: Number((item.precioCents / 100).toFixed(2)),
+        unit_price: Number(item.precioCents.toFixed(2)),
       })),
       metadata: {
         order_id: order.id,

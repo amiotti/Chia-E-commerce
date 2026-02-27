@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type PaymentActionState =
   | { type: "idle" }
-  | { type: "loading"; provider: "mercadopago" | "galiopay" }
+  | { type: "loading"; provider: "galiopay" }
   | { type: "result"; message: string }
   | { type: "error"; message: string };
 
@@ -14,31 +14,6 @@ export default function OrderPaymentActions({
   orderId: string;
 }) {
   const [state, setState] = useState<PaymentActionState>({ type: "idle" });
-
-  async function createMercadoPagoCheckout() {
-    setState({ type: "loading", provider: "mercadopago" });
-    try {
-      const response = await fetch("/api/pagos/mercadopago/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error ?? "No se pudo crear el checkout de Mercado Pago");
-      }
-
-      const target = data.sandboxInitPoint || data.initPoint;
-      if (typeof target === "string" && target.startsWith("http")) {
-        window.location.href = target;
-        return;
-      }
-
-      setState({ type: "result", message: "Preferencia creada, pero Mercado Pago no devolvió URL de checkout." });
-    } catch (error) {
-      setState({ type: "error", message: error instanceof Error ? error.message : "Error inesperado" });
-    }
-  }
 
   async function createGalioRequest() {
     setState({ type: "loading", provider: "galiopay" });
@@ -69,24 +44,14 @@ export default function OrderPaymentActions({
 
   return (
     <div className="mt-4 space-y-3">
-      <div className="grid gap-2 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={createMercadoPagoCheckout}
-          disabled={state.type === "loading"}
-          className="rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF] transition hover:bg-[#587055] disabled:opacity-60"
-        >
-          {state.type === "loading" && state.provider === "mercadopago" ? "Creando checkout..." : "Pagar con Mercado Pago"}
-        </button>
-        <button
-          type="button"
-          onClick={createGalioRequest}
-          disabled={state.type === "loading"}
-          className="rounded-2xl border border-[#587055]/20 bg-white/80 px-4 py-2.5 text-sm font-medium text-[#0B3816] transition hover:bg-[#F0ECDF] disabled:opacity-60"
-        >
-          {state.type === "loading" && state.provider === "galiopay" ? "Solicitando..." : "Transferencia (Galio Pay)"}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={createGalioRequest}
+        disabled={state.type === "loading"}
+        className="w-full rounded-2xl bg-[#0B3816] px-4 py-2.5 text-sm font-medium text-[#F0ECDF] transition hover:bg-[#587055] disabled:opacity-60"
+      >
+        {state.type === "loading" && state.provider === "galiopay" ? "Solicitando..." : "Pagar por transferencia (Galio Pay)"}
+      </button>
 
       {state.type === "result" ? (
         <div className="rounded-xl border border-[#8BA37D]/35 bg-[#8BA37D]/12 px-3 py-2 text-sm text-[#0B3816]">

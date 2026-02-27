@@ -29,7 +29,10 @@ export const orderItemSnapshotSchema = z.object({
   subtotalCents: z.number().int().nonnegative(),
 });
 
+export const fulfillmentTypeSchema = z.enum(["envio", "retiro_local"]);
+
 export const orderShippingSchema = z.object({
+  fulfillmentType: fulfillmentTypeSchema.default("envio"),
   nombreCompleto: z.string(),
   email: z.email(),
   telefono: z.string().optional().default(""),
@@ -38,6 +41,9 @@ export const orderShippingSchema = z.object({
   provincia: z.string().optional().default(""),
   codigoPostal: z.string().optional().default(""),
   notas: z.string().optional().default(""),
+  itemsTotalCents: z.number().int().nonnegative().optional().default(0),
+  serviceFeeCents: z.number().int().nonnegative().optional().default(0),
+  deliveryFeeCents: z.number().int().nonnegative().optional().default(0),
 });
 
 export const orderSchema = z.object({
@@ -58,5 +64,6 @@ export const createOrderRequestSchema = z.object({
 
 export type CartItem = z.infer<typeof cartItemSchema>;
 export type CartSnapshot = z.infer<typeof cartSnapshotSchema>;
+export type FulfillmentType = z.infer<typeof fulfillmentTypeSchema>;
 export type Order = z.infer<typeof orderSchema>;
 export type CreateOrderRequest = z.infer<typeof createOrderRequestSchema>;

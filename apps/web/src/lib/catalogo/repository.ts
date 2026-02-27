@@ -28,7 +28,13 @@ const supabaseProductRowSchema = z.object({
 });
 
 function normalizeSearch(value?: string) {
-  return value?.trim().toLocaleLowerCase("es-AR") ?? "";
+  return (
+    value
+      ?.trim()
+      .toLocaleLowerCase("es-AR")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "") ?? ""
+  );
 }
 
 function applyFilters(items: Producto[], filters: ProductoFiltro) {
@@ -51,6 +57,8 @@ function applyFilters(items: Producto[], filters: ProductoFiltro) {
     filtered = filtered.filter((producto) =>
       normalizeSearch(producto.nombre).includes(query) ||
       normalizeSearch(producto.descripcion).includes(query) ||
+      normalizeSearch(producto.categoria).includes(query) ||
+      normalizeSearch(producto.slug).includes(query) ||
       producto.tags.some((tag) => normalizeSearch(tag).includes(query)),
     );
   }
