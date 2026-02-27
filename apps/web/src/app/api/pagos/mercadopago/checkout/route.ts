@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getOrderById } from "@/lib/commerce/orders-store";
 import { createPaymentRecord, updatePaymentRecord } from "@/lib/payments/store";
+import { resolveAppUrl } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Falta MERCADOPAGO_ACCESS_TOKEN en .env.local" }, { status: 400 });
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
+    const appUrl = resolveAppUrl(request);
     const isLocalAppUrl = /localhost|127\.0\.0\.1/i.test(appUrl);
 
     const payment = await createPaymentRecord({

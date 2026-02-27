@@ -3,7 +3,7 @@ import { z } from "zod";
 import { canAccessOrder, requireAuthApi } from "@/lib/auth/guards";
 import { getOrderById } from "@/lib/commerce/orders-store";
 import { createPaymentRecord, updatePaymentRecord } from "@/lib/payments/store";
-import { rateLimit, requireSameOriginMutation } from "@/lib/security/request";
+import { rateLimit, requireSameOriginMutation, resolveAppUrl } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const apiBase = process.env.GALIOPAY_API_BASE_URL?.trim();
     const apiKey = process.env.GALIOPAY_API_KEY?.trim();
     const clientId = process.env.GALIOPAY_CLIENT_ID?.trim();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
+    const appUrl = resolveAppUrl(request);
     if (!apiBase || !apiKey || !clientId) {
       return NextResponse.json({ ok: false, error: "Faltan variables de Galio Pay en .env.local" }, { status: 400 });
     }

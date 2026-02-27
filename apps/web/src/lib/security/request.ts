@@ -111,3 +111,22 @@ export function denyInProductionRoute() {
   }
   return null;
 }
+export function resolveAppUrl(request: Request) {
+  const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (explicit) {
+    try {
+      return new URL(explicit).origin;
+    } catch {
+      // ignore invalid override and fall back to request-derived origin
+    }
+  }
+
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  if (forwardedHost) {
+    const protocol = forwardedProto?.split(",")[0]?.trim() || "https";
+    return `${protocol}://${forwardedHost.split(",")[0]?.trim()}`;
+  }
+
+  return new URL(request.url).origin;
+}
