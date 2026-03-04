@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth/guards";
-import { createManualAdminProducto, readAdminProductos } from "@/lib/catalogo/admin-store";
+import { createManualAdminProducto, readAdminProductos, updateAdminProducto } from "@/lib/catalogo/admin-store";
 import { rateLimit, requireSameOriginMutation } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const manualProductoPayloadSchema = z.object({
+const manualProductoPayloadShape = {
   slug: z.string(),
   nombre: z.string(),
   descripcion: z.string(),
@@ -20,7 +20,15 @@ const manualProductoPayloadSchema = z.object({
   activo: z.boolean().default(true),
   canjeConPuntos: z.boolean().default(false),
   puntosCanje: z.coerce.number().int().positive().nullable().optional().transform((value) => value ?? null),
-}).superRefine((value, ctx) => {
+};
+
+const manualProductoPayloadSchema = z.object(manualProductoPayloadShape).superRefine((value, ctx) => {
+  if (value.canjeConPuntos && (!value.puntosCanje || value.puntosCanje <= 0)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["puntosCanje"], message: "Definí una cantidad de puntos válida para habilitar el canje." });
+  }
+});
+
+const manualProductoUpdatePayloadSchema = z.object({ id: z.string(), ...manualProductoPayloadShape }).superRefine((value, ctx) => {
   if (value.canjeConPuntos && (!value.puntosCanje || value.puntosCanje <= 0)) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["puntosCanje"], message: "Definí una cantidad de puntos válida para habilitar el canje." });
   }
@@ -81,5 +89,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, producto }, { status: 201, headers: { "Content-Type": "application/json; charset=utf-8" } });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "No se pudo crear el producto" }, { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } });
+  }
+}
+
+export async function PATCH(request: Request) {
+  const originCheck = requireSameOriginMutation(request);
+  if (originCheck) return originCheck;
+  const limited = rateLimit(request, { namespace: "admin:productos:update", limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
+  const auth = await requireAdminApi();
+  if (!auth.ok) return auth.response;
+  try {
+    const payload = await request.json();
+    const parsed = manualProductoUpdatePayloadSchema.parse(payload);
+    const producto = await updateAdminProducto(parsed);
+    return NextResponse.json({ ok: true, producto }, { status: 200, headers: { "Content-Type": "application/json; charset=utf-8" } });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "No se pudo actualizar el producto" }, { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } });
   }
 }

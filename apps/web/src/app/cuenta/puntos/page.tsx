@@ -43,17 +43,17 @@ export default async function CuentaPuntosPage() {
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Saldo actual</p>
-              <p className="mt-1 text-4xl font-semibold tabular-nums text-[#0B3816]">{wallet.balancePoints}</p>
+              <p className="mt-1 text-4xl font-mono font-semibold tracking-tight tabular-nums text-[#0B3816]">{wallet.balancePoints}</p>
               <p className="text-xs text-[#587055]">Puntos disponibles para canjear</p>
             </div>
             <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Acumulados</p>
-              <p className="mt-1 text-4xl font-semibold tabular-nums text-[#0B3816]">{wallet.lifetimeEarned}</p>
+              <p className="mt-1 text-4xl font-mono font-semibold tracking-tight tabular-nums text-[#0B3816]">{wallet.lifetimeEarned}</p>
               <p className="text-xs text-[#587055]">Total histórico acreditado</p>
             </div>
             <div className="rounded-2xl border border-[#587055]/10 bg-white/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[#587055]">Canjeados</p>
-              <p className="mt-1 text-4xl font-semibold tabular-nums text-[#0B3816]">{wallet.lifetimeRedeemed}</p>
+              <p className="mt-1 text-4xl font-mono font-semibold tracking-tight tabular-nums text-[#0B3816]">{wallet.lifetimeRedeemed}</p>
               <p className="text-xs text-[#587055]">Puntos usados en productos</p>
             </div>
           </div>

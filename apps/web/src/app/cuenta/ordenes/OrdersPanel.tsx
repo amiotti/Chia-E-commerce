@@ -67,7 +67,7 @@ export default function OrdersPanel({ initialOrders, isAdmin }: Props) {
                   <div>
                     <p className="text-brand-primary font-medium">{order.id}</p>
                     <p className="text-brand-muted text-xs uppercase tracking-[0.15em]">{order.status}</p>
-                    <p className="text-brand-muted mt-1 text-xs">{new Date(order.createdAt).toLocaleString("es-AR")}</p>
+                    <p className="text-brand-muted mt-1 text-xs">{dateTimeFormatter.format(new Date(order.createdAt))}</p>
                     {isAdmin ? (
                       <p className="text-brand-muted mt-1 text-xs">Cliente: {order.shipping.nombreCompleto} · {order.shipping.email}</p>
                     ) : null}

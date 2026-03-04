@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type ThemeMode = "light" | "dark";
 
 const STORAGE_KEY = "chia_theme_mode";
+const THEME_EVENT = "chia-theme-change";
 
 function applyTheme(mode: ThemeMode) {
   const root = document.documentElement;
@@ -27,29 +28,45 @@ function resolveTheme(): ThemeMode {
   return "light";
 }
 
+function subscribe(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const media = window.matchMedia?.("(prefers-color-scheme: dark)");
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) onStoreChange();
+  };
+  const handleThemeEvent = () => onStoreChange();
+  const handleMedia = () => onStoreChange();
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(THEME_EVENT, handleThemeEvent);
+  media?.addEventListener?.("change", handleMedia);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(THEME_EVENT, handleThemeEvent);
+    media?.removeEventListener?.("change", handleMedia);
+  };
+}
+
 export default function ThemeToggle({
   variant = "floating",
 }: {
   variant?: "floating" | "inline";
 }) {
-  const [mode, setMode] = useState<ThemeMode>(resolveTheme);
-
-  useEffect(() => {
-    applyTheme(mode);
-  }, [mode]);
-
-  function toggleTheme() {
-    const nextMode: ThemeMode = mode === "dark" ? "light" : "dark";
-    setMode(nextMode);
-    applyTheme(nextMode);
-    window.localStorage.setItem(STORAGE_KEY, nextMode);
-  }
-
+  const mode = useSyncExternalStore(subscribe, resolveTheme, () => "light");
   const isDark = mode === "dark";
   const buttonClasses =
     variant === "inline"
       ? "theme-toggle inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#587055]/20 bg-white/80 text-[#0B3816] shadow-[0_8px_20px_rgba(11,56,22,0.10)] backdrop-blur-md transition hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-[#F0ECDF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8858E]"
       : "theme-toggle fixed right-4 top-4 z-[70] inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#587055]/20 bg-white/80 text-[#0B3816] shadow-[0_10px_25px_rgba(11,56,22,0.12)] backdrop-blur-md transition hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-[#F0ECDF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8858E] sm:right-6 sm:top-5";
+
+  function toggleTheme() {
+    const nextMode: ThemeMode = isDark ? "light" : "dark";
+    applyTheme(nextMode);
+    window.localStorage.setItem(STORAGE_KEY, nextMode);
+    window.dispatchEvent(new Event(THEME_EVENT));
+  }
 
   return (
     <button
