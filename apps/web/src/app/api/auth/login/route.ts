@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 import { buildSessionPayload, setSessionCookie } from "@/lib/auth/session";
-import { loginWithSupabaseAuth } from "@/lib/auth/supabase-auth";
+import { loginWithInstantAuth } from "@/lib/auth/instant-auth";
 import { rateLimit, requireSameOriginMutation, sanitizeRedirectPath } from "@/lib/security/request";
 
 export const runtime = "nodejs";
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const redirectTo = sanitizeRedirectPath(String(formData.get("redirectTo") ?? "/cuenta"), "/cuenta");
 
   try {
-    const user = await loginWithSupabaseAuth({ email, password });
+    const user = await loginWithInstantAuth({ email, password });
     if (!user) {
       const url = new URL("/cuenta/login", request.url);
       url.searchParams.set("error", "Credenciales inválidas.");

@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 import { buildSessionPayload, setSessionCookie } from "@/lib/auth/session";
-import { registerWithSupabaseAuth } from "@/lib/auth/supabase-auth";
+import { registerWithInstantAuth } from "@/lib/auth/instant-auth";
 import { rateLimit, requireSameOriginMutation, sanitizeRedirectPath } from "@/lib/security/request";
 
 export const runtime = "nodejs";
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const redirectTo = sanitizeRedirectPath(String(formData.get("redirectTo") ?? "/cuenta"), "/cuenta");
 
   try {
-    const user = await registerWithSupabaseAuth({ email, password });
+    const user = await registerWithInstantAuth({ email, password });
     await setSessionCookie(buildSessionPayload(user));
 
     const url = new URL(redirectTo || "/cuenta", request.url);

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { maskSecret, readSupabaseEnv } from "@/lib/env.server";
+﻿import { NextResponse } from "next/server";
+import { maskSecret, readInstantEnv } from "@/lib/env.server";
 import { denyInProductionRoute } from "@/lib/security/request";
-import { getSupabaseHealthSnapshot, requireSupabaseServiceClient } from "@/lib/supabase/server";
+import { getInstantHealthSnapshot, requireInstantAdminClient } from "@/lib/instant/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,12 +14,13 @@ type TableCheck = {
 
 async function getTableCount(table: string): Promise<TableCheck> {
   try {
-    const client = requireSupabaseServiceClient() as any;
-    const { count, error } = await client.from(table).select("*", { head: true, count: "exact" });
-    if (error) {
-      return { ok: false, count: null, error: error.message };
+    const db = requireInstantAdminClient();
+    const result = await db.query({ [table]: {} });
+    const rows = (result as Record<string, unknown>)[table];
+    if (!Array.isArray(rows)) {
+      return { ok: false, count: null, error: "La consulta no devolvio un array." };
     }
-    return { ok: true, count: typeof count === "number" ? count : 0, error: null };
+    return { ok: true, count: rows.length, error: null };
   } catch (error) {
     return {
       ok: false,
@@ -57,46 +58,52 @@ export async function GET() {
   const blocked = denyInProductionRoute();
   if (blocked) return blocked;
 
-  const supabaseEnv = readSupabaseEnv();
-  const health = getSupabaseHealthSnapshot();
+  const instantEnv = readInstantEnv();
+  const health = getInstantHealthSnapshot();
 
-  const [usersProfile, products, carts, orders, payments] = await Promise.all([
+  const [usersProfile, products, carts, orders, payments, loyaltyWallets, loyaltyTransactions, loyaltyRedemptions] = await Promise.all([
     getTableCount("users_profile"),
     getTableCount("products"),
     getTableCount("carts"),
     getTableCount("orders"),
     getTableCount("payments"),
+    getTableCount("loyalty_wallets"),
+    getTableCount("loyalty_transactions"),
+    getTableCount("loyalty_redemptions"),
   ]);
 
   return NextResponse.json(
     {
       etapa: 7,
-      descripcion: "QA + diagnósticos finales (DB, pagos, webhooks, tablas y configuración).",
-      supabase: {
-        configuradoPublico: supabaseEnv.status.configuredPublic,
-        configuradoServidor: supabaseEnv.status.configuredServer,
-        issues: supabaseEnv.status.issues,
-        url: supabaseEnv.data?.NEXT_PUBLIC_SUPABASE_URL ?? null,
-        anonKeyMasked: maskSecret(supabaseEnv.data?.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-        serviceKeyMasked: maskSecret(supabaseEnv.data?.SUPABASE_SERVICE_ROLE_KEY),
+      descripcion: "QA + diagnosticos finales (InstantDB, pagos, webhooks, entidades y configuracion).",
+      instantdb: {
+        configuradoPublico: instantEnv.status.configuredPublic,
+        configuradoAdmin: instantEnv.status.configuredAdmin,
+        issues: instantEnv.status.issues,
+        appIdMasked: maskSecret(instantEnv.data?.NEXT_PUBLIC_INSTANT_APP_ID),
+        adminTokenMasked: maskSecret(instantEnv.data?.INSTANT_APP_ADMIN_TOKEN),
+        apiUri: instantEnv.data?.INSTANT_API_URI ?? null,
         health,
       },
-      tablas: {
+      entidades: {
         users_profile: usersProfile,
         products,
         carts,
         orders,
         payments,
+        loyalty_wallets: loyaltyWallets,
+        loyalty_transactions: loyaltyTransactions,
+        loyalty_redemptions: loyaltyRedemptions,
       },
       pagos: readPaymentsEnv(),
       recomendaciones: [
         !process.env.MERCADOPAGO_WEBHOOK_SECRET?.trim()
-          ? "Configurar MERCADOPAGO_WEBHOOK_SECRET antes de producción."
+          ? "Configurar MERCADOPAGO_WEBHOOK_SECRET antes de produccion."
           : null,
         !process.env.GALIOPAY_WEBHOOK_SECRET?.trim()
-          ? "Configurar GALIOPAY_WEBHOOK_SECRET antes de producción."
+          ? "Configurar GALIOPAY_WEBHOOK_SECRET antes de produccion."
           : null,
-        !supabaseEnv.status.configuredServer ? "Verificar SUPABASE_SERVICE_ROLE_KEY en apps/web/.env.local." : null,
+        !instantEnv.status.configuredAdmin ? "Verificar INSTANT_APP_ADMIN_TOKEN en apps/web/.env.local." : null,
       ].filter(Boolean),
       checkedAt: new Date().toISOString(),
     },

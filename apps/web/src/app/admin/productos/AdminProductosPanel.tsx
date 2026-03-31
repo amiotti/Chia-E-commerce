@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Producto } from "@chia/shared";
 import { useMemo, useState, useTransition } from "react";
@@ -141,7 +141,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
     event.preventDefault();
     clearAlerts();
     if (!importFile) {
-      setError("Seleccioná un archivo .json o .csv para importar.");
+      setError("SeleccionÃ¡ un archivo .json o .csv para importar.");
       return;
     }
 
@@ -155,7 +155,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error ?? "No se pudo importar el archivo");
 
-        setMensaje(`Importación ${data.result.mode}: ${data.result.importedCount} producto(s). Total en Supabase: ${data.result.totalAfter}.`);
+        setMensaje(`ImportaciÃ³n ${data.result.mode}: ${data.result.importedCount} producto(s). Total en InstantDB: ${data.result.totalAfter}.`);
         setImportFile(null);
         const input = document.getElementById("archivo-productos") as HTMLInputElement | null;
         if (input) input.value = "";
@@ -170,11 +170,11 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
     <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
       <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
         <div className="mb-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Gestión de catálogo</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">GestiÃ³n de catÃ¡logo</p>
           <h2 className="mt-1 text-2xl font-semibold leading-tight tracking-tight text-[#0B3816]">
             {isEditing ? "Editar producto" : "Agregar producto"}
           </h2>
-          <p className="mt-2 text-sm text-[#0B3816]/75">Guardá productos en Supabase y definí cuáles participan del programa de puntos.</p>
+          <p className="mt-2 text-sm text-[#0B3816]/75">GuardÃ¡ productos en InstantDB y definÃ­ cuÃ¡les participan del programa de puntos.</p>
         </div>
 
         <form onSubmit={handleManualSubmit} className="space-y-4">
@@ -184,7 +184,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
               <input id="slug" value={manualForm.slug} onChange={(e) => setManualForm((p) => ({ ...p, slug: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
             </div>
             <div>
-              <label htmlFor="categoria" className="mb-1 block text-sm font-medium text-[#0B3816]">Categoría</label>
+              <label htmlFor="categoria" className="mb-1 block text-sm font-medium text-[#0B3816]">CategorÃ­a</label>
               <input id="categoria" value={manualForm.categoria} onChange={(e) => setManualForm((p) => ({ ...p, categoria: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
             </div>
           </div>
@@ -195,7 +195,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
           </div>
 
           <div>
-            <label htmlFor="descripcion" className="mb-1 block text-sm font-medium text-[#0B3816]">Descripción</label>
+            <label htmlFor="descripcion" className="mb-1 block text-sm font-medium text-[#0B3816]">DescripciÃ³n</label>
             <textarea id="descripcion" value={manualForm.descripcion} onChange={(e) => setManualForm((p) => ({ ...p, descripcion: e.target.value }))} rows={4} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" required />
           </div>
 
@@ -226,7 +226,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
           </div>
 
           <div>
-            <label htmlFor="imagenes" className="mb-1 block text-sm font-medium text-[#0B3816]">Imágenes (URLs separadas por |)</label>
+            <label htmlFor="imagenes" className="mb-1 block text-sm font-medium text-[#0B3816]">ImÃ¡genes (URLs separadas por |)</label>
             <input id="imagenes" value={manualForm.imagenes} onChange={(e) => setManualForm((p) => ({ ...p, imagenes: e.target.value }))} className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" />
           </div>
 
@@ -246,7 +246,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
             </button>
             {isEditing ? (
               <button type="button" onClick={resetForm} className="rounded-2xl border border-[#587055]/20 bg-white/70 px-4 py-2.5 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">
-                Cancelar edición
+                Cancelar ediciÃ³n
               </button>
             ) : null}
           </div>
@@ -256,7 +256,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
       <div className="space-y-5">
         <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
           <div className="mb-4">
-            <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Importación por archivo</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">ImportaciÃ³n por archivo</p>
             <h2 className="mt-1 text-2xl font-semibold leading-tight tracking-tight text-[#0B3816]">Cargar listado</h2>
             <p className="mt-2 text-sm text-[#0B3816]/75">Soporta .json y .csv, incluyendo columnas de canje por puntos.</p>
           </div>
@@ -288,7 +288,7 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
         <section className="panel-surface rounded-3xl border border-[#587055]/15 p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">Catálogo cargado</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-[#587055]">CatÃ¡logo cargado</p>
               <h2 className="mt-1 text-2xl font-semibold leading-tight tracking-tight text-[#0B3816]">{items.length} producto(s)</h2>
             </div>
             <button type="button" onClick={() => void refreshProductos()} className="rounded-xl border border-[#587055]/20 bg-white/70 px-3 py-2 text-sm text-[#0B3816] hover:bg-[#F0ECDF]">Refrescar</button>
@@ -299,19 +299,19 @@ export default function AdminProductosPanel({ initialItems }: { initialItems: Pr
 
           <div className="mb-3">
             <label htmlFor="buscar-producto-admin" className="mb-1 block text-sm font-medium text-[#0B3816]">Buscar producto</label>
-            <input id="buscar-producto-admin" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nombre, slug, categoría o tag" className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" />
+            <input id="buscar-producto-admin" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nombre, slug, categorÃ­a o tag" className="w-full rounded-2xl border border-[#8BA37D]/45 bg-white/85 px-4 py-2.5 text-sm outline-none focus:border-[#587055]" />
           </div>
 
           <div className="max-h-[28rem] space-y-2 overflow-auto pr-1">
             {filteredItems.length === 0 ? (
-              <p className="text-sm text-[#0B3816]/70">No hay productos que coincidan con la búsqueda.</p>
+              <p className="text-sm text-[#0B3816]/70">No hay productos que coincidan con la bÃºsqueda.</p>
             ) : (
               filteredItems.map((item) => (
                 <button key={item.id} type="button" onClick={() => selectProducto(item)} className={`block w-full rounded-2xl border px-3 py-3 text-left transition ${manualForm.id === item.id ? "border-[#587055]/35 bg-[#F0ECDF]" : "border-[#587055]/10 bg-white/70 hover:bg-[#F0ECDF]"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-[#0B3816]">{item.nombre}</p>
-                      <p className="text-xs text-[#587055]">{item.slug} · {item.categoria}</p>
+                      <p className="text-xs text-[#587055]">{item.slug} Â· {item.categoria}</p>
                       {item.canjeConPuntos && item.puntosCanje ? <p className="mt-1 text-xs text-[#0B3816]/75">Canjeable por {item.puntosCanje} puntos</p> : null}
                     </div>
                     <span className="rounded-full bg-[#F0ECDF] px-2 py-0.5 text-xs text-[#587055]">{item.stock} u.</span>

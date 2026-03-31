@@ -1,22 +1,22 @@
-# CHIA E-commerce
+﻿# CHIA E-commerce
 
-MVP e-commerce de **CHÍA Espacio Saludable** construido por etapas con Next.js + Supabase + pagos (Mercado Pago / Galio Pay).
+MVP e-commerce de **CHÃA Espacio Saludable** construido por etapas con Next.js + InstantDB + pagos (Mercado Pago / Galio Pay).
 
 ## Estado actual
-- `Paso 0`: bootstrap monorepo + Next.js + Tailwind + ESLint ✅
-- `Paso 1`: schemas/shared + clientes Supabase + diagnóstico inicial ✅
-- `Paso 2`: catálogo público + detalle + admin de productos (manual/importación) ✅
-- `Paso 3`: auth local + RBAC (`user/admin`) ✅
-- `Paso 4`: carrito + checkout + órdenes `PENDIENTE_PAGO` ✅
-- `Paso 5`: pagos (Mercado Pago Checkout API + Galio Pay) + webhooks base/reconciliación ✅
-- `Paso 6`: hardening (headers, rate limit simple, origin checks, webhook secret) ✅
-- `Paso 7`: QA y documentación final ✅ (este README + diagnóstico final)
+- `Paso 0`: bootstrap monorepo + Next.js + Tailwind + ESLint âœ…
+- `Paso 1`: schemas/shared + cliente InstantDB + diagnÃ³stico inicial âœ…
+- `Paso 2`: catÃ¡logo pÃºblico + detalle + admin de productos (manual/importaciÃ³n) âœ…
+- `Paso 3`: auth local + RBAC (`user/admin`) âœ…
+- `Paso 4`: carrito + checkout + Ã³rdenes `PENDIENTE_PAGO` âœ…
+- `Paso 5`: pagos (Mercado Pago Checkout API + Galio Pay) + webhooks base/reconciliaciÃ³n âœ…
+- `Paso 6`: hardening (headers, rate limit simple, origin checks, webhook secret) âœ…
+- `Paso 7`: QA y documentaciÃ³n final âœ… (este README + diagnÃ³stico final)
 
 ## Stack
 - `Next.js` (App Router)
 - `TypeScript`
 - `Tailwind CSS`
-- `Supabase` (DB / persistencia)
+- `InstantDB` (DB / persistencia)
 - `Zod`
 - `Mercado Pago Checkout API`
 - `Galio Pay`
@@ -29,18 +29,18 @@ MVP e-commerce de **CHÍA Espacio Saludable** construido por etapas con Next.js 
 ## Requisitos
 - `Node.js` 20+
 - `npm`
-- Proyecto Supabase activo
+- Proyecto InstantDB activo
 
 ## Variables de entorno
 Para `Next.js` en este monorepo, usar:
 - `apps/web/.env.local` (obligatorio para runtime)
 
-También podés mantener copia en raíz (`.env.local`), pero la app lee desde `apps/web/.env.local`.
+TambiÃ©n podÃ©s mantener copia en raÃ­z (`.env.local`), pero la app lee desde `apps/web/.env.local`.
 
 Variables principales:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_INSTANT_APP_ID`
+- `INSTANT_APP_ADMIN_TOKEN`
+- `INSTANT_API_URI (opcional)`
 - `SESSION_SECRET`
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
 - `MERCADOPAGO_ACCESS_TOKEN`
@@ -50,7 +50,7 @@ Variables principales:
 - `GALIOPAY_API_KEY`
 - `GALIOPAY_WEBHOOK_SECRET` (recomendado para deploy)
 
-## Instalación y desarrollo
+## InstalaciÃ³n y desarrollo
 ```bash
 npm install
 npm run dev
@@ -59,23 +59,21 @@ npm run dev
 Abrir:
 - `http://localhost:3000`
 
-## Migraciones Supabase (obligatorio)
-Ejecutar en `SQL Editor` de Supabase, en este orden:
-1. `supabase/migrations/0001_mvp_init.sql`
-2. `supabase/migrations/0002_users_profile_password_hash.sql`
-
-Esto crea:
+## Modelo de datos InstantDB
+La app usa estas entidades:
 - `users_profile`
 - `products`
 - `carts`
 - `orders`
 - `payments`
-- y agrega `password_hash` a `users_profile`
+- `loyalty_wallets`
+- `loyalty_transactions`
+- `loyalty_redemptions`
 
-## Datos de prueba (catálogo)
-Si la tabla `products` está vacía, podés:
-- cargar desde `/admin/productos` (manual o importación `.json/.csv`)
-- o insertar seed de prueba (ya se usó durante el desarrollo)
+## Datos de prueba (catÃ¡logo)
+Si la tabla `products` estÃ¡ vacÃ­a, podÃ©s:
+- cargar desde `/admin/productos` (manual o importaciÃ³n `.json/.csv`)
+- o insertar seed de prueba (ya se usÃ³ durante el desarrollo)
 
 ## Flujo de prueba recomendado (QA manual)
 ### 1) Auth / cuenta
@@ -87,19 +85,19 @@ Si la tabla `products` está vacía, podés:
 ### 2) Admin productos
 1. Ir a `/admin/productos`
 2. Crear producto manualmente
-3. Probar importación `.json` / `.csv`
-4. Verificar filas en `public.products` (Supabase)
+3. Probar importaciÃ³n `.json` / `.csv`
+4. Verificar filas en `products` (InstantDB)
 
-### 3) Catálogo
+### 3) CatÃ¡logo
 1. Abrir `/catalogo`
 2. Abrir un producto `/catalogo/[slug]`
 3. Agregar al carrito
 
-### 4) Checkout / órdenes
+### 4) Checkout / Ã³rdenes
 1. Ir a `/carrito`
 2. Ir a `/checkout`
 3. Crear orden
-4. Verificar `public.orders` (`PENDIENTE_PAGO`)
+4. Verificar `orders` (`PENDIENTE_PAGO`)
 
 ### 5) Pagos
 #### Mercado Pago
@@ -111,7 +109,7 @@ Si la tabla `products` está vacía, podés:
 #### Galio Pay
 1. Abrir `/ordenes/[id]`
 2. Click `Transferencia (Galio Pay)`
-3. Verificar redirección a link de pago Galio (si responde `url`)
+3. Verificar redirecciÃ³n a link de pago Galio (si responde `url`)
 4. Verificar `payments`
 
 ### 6) Webhooks
@@ -120,25 +118,25 @@ Si la tabla `products` está vacía, podés:
 
 Los webhooks actualizan `payments` y `orders.status` (mapeo best-effort de estados).
 
-## Diagnósticos útiles
+## DiagnÃ³sticos Ãºtiles
 - `GET /api/diagnostico/paso-1` -> setup inicial (schemas/env/seed)
-- `GET /api/diagnostico/paso-7` -> validación final (env, tablas, pagos, webhooks)
+- `GET /api/diagnostico/paso-7` -> validaciÃ³n final (env, tablas, pagos, webhooks)
 
-El diagnóstico `Paso 7` muestra:
-- configuración Supabase (public/server)
-- conteo de tablas (`users_profile`, `products`, `carts`, `orders`, `payments`)
-- configuración de pagos (MP/Galio)
+El diagnÃ³stico `Paso 7` muestra:
+- configuraciÃ³n InstantDB (public/admin)
+- conteo de entidades (`users_profile`, `products`, `carts`, `orders`, `payments`)
+- configuraciÃ³n de pagos (MP/Galio)
 - recomendaciones antes de deploy
 
 ## Seguridad / hardening implementado (Paso 6)
 - `security headers` globales (Next)
 - `rate limiting` simple en memoria para rutas sensibles
 - `Origin check` en mutaciones admin
-- `webhook shared secret` (si configurás `MERCADOPAGO_WEBHOOK_SECRET` / `GALIOPAY_WEBHOOK_SECRET`)
+- `webhook shared secret` (si configurÃ¡s `MERCADOPAGO_WEBHOOK_SECRET` / `GALIOPAY_WEBHOOK_SECRET`)
 
-## Importante (producción)
+## Importante (producciÃ³n)
 ### Webhooks con secreto
-Configurar URL con secreto compartido (si usás este modo):
+Configurar URL con secreto compartido (si usÃ¡s este modo):
 - Mercado Pago: `https://tu-dominio/api/webhooks/mercadopago?secret=TU_SECRETO`
 - Galio Pay: `https://tu-dominio/api/webhooks/galiopay?secret=TU_SECRETO`
 
@@ -146,14 +144,14 @@ Y setear el mismo valor en:
 - `MERCADOPAGO_WEBHOOK_SECRET`
 - `GALIOPAY_WEBHOOK_SECRET`
 
-### Pendientes recomendados antes de producción real
-- Validación criptográfica nativa de firmas de webhooks (no solo secret compartido)
+### Pendientes recomendados antes de producciÃ³n real
+- ValidaciÃ³n criptogrÃ¡fica nativa de firmas de webhooks (no solo secret compartido)
 - Rate limit persistente (Redis) en lugar de memoria
-- Migrar auth local a Supabase Auth
+- Migrar auth local a Instant Auth (opcional)
 - Observabilidad (logs centralizados / errores)
 - Pruebas automatizadas E2E
 
-## Comandos útiles
+## Comandos Ãºtiles
 ```bash
 npm run build
 npm run lint
@@ -161,22 +159,23 @@ npm run test
 ```
 
 ## Branding / UI
-- Paleta CHÍA aplicada (verde, crema, rosa)
+- Paleta CHÃA aplicada (verde, crema, rosa)
 - `The Seasons` + `Along Sans s2` cargadas localmente (`next/font/local`)
 - modo oscuro con toggle (sol/luna)
-- favicon con logo simplificado CHÍA
+- favicon con logo simplificado CHÃA
 
-## Troubleshooting rápido
-### Error: `Supabase service role no está configurado`
-- verificar `SUPABASE_SERVICE_ROLE_KEY` en `apps/web/.env.local`
+## Troubleshooting rÃ¡pido
+### Error: `InstantDB no estÃ¡ configurado`
+- verificar `NEXT_PUBLIC_INSTANT_APP_ID` e `INSTANT_APP_ADMIN_TOKEN` en `apps/web/.env.local`
 - reiniciar `npm run dev`
 
-### Catálogo vacío
-- revisar `public.products` en Supabase
+### CatÃ¡logo vacÃ­o
+- revisar `products` en InstantDB
 - probar `/api/diagnostico/paso-7`
 - cargar productos desde `/admin/productos`
 
 ### Problemas de webhooks
-- confirmar URL pública (deploy o túnel)
+- confirmar URL pÃºblica (deploy o tÃºnel)
 - revisar secretos (`MERCADOPAGO_WEBHOOK_SECRET`, `GALIOPAY_WEBHOOK_SECRET`)
-- revisar `public.payments` / `public.orders`
+- revisar `payments` / `orders`
+

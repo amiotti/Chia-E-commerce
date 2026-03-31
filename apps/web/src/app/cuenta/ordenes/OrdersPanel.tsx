@@ -14,6 +14,10 @@ const arsFormatter = new Intl.NumberFormat("es-AR", {
   currency: "ARS",
   maximumFractionDigits: 0,
 });
+const dateTimeFormatter = new Intl.DateTimeFormat("es-AR", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 
 export default function OrdersPanel({ initialOrders, isAdmin }: Props) {
   const [orders, setOrders] = useState(initialOrders);

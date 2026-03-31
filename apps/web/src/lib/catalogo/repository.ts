@@ -1,8 +1,8 @@
-import { productoSchema, type Producto, type ProductoFiltro } from "@chia/shared";
+﻿import { productoSchema, type Producto, type ProductoFiltro } from "@chia/shared";
 import { z } from "zod";
-import { requireSupabaseAnonServerClient } from "@/lib/supabase/server";
+import { requireInstantAdminClient } from "@/lib/instant/server";
 
-type CatalogoDataSource = "supabase";
+type CatalogoDataSource = "instantdb";
 
 export type CatalogoListado = {
   items: Producto[];
@@ -13,8 +13,20 @@ export type CatalogoListado = {
   warnings: string[];
 };
 
-const supabaseProductRowSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform((value) => String(value)), slug: z.string(), name: z.string(), description: z.string(), price_cents: z.number().int().nonnegative(), currency: z.string().default("ARS"), images: z.array(z.string().url()).nullish().transform((value) => value ?? []), stock: z.number().int().nonnegative(), category: z.string(), tags: z.array(z.string()).nullish().transform((value) => value ?? []), active: z.boolean().default(true), points_enabled: z.boolean().default(false), points_cost: z.number().int().positive().nullable().optional(),
+const productRowSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform((value) => String(value)),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string(),
+  price_cents: z.number().int().nonnegative(),
+  currency: z.string().default("ARS"),
+  images: z.array(z.string().url()).nullish().transform((value) => value ?? []),
+  stock: z.number().int().nonnegative(),
+  category: z.string(),
+  tags: z.array(z.string()).nullish().transform((value) => value ?? []),
+  active: z.boolean().default(true),
+  points_enabled: z.boolean().default(false),
+  points_cost: z.number().int().positive().nullable().optional(),
 });
 
 function normalizeSearch(value?: string) {
@@ -43,31 +55,48 @@ function categoriasFromItems(items: Producto[]) {
   return [...new Set(items.filter((item) => item.activo).map((item) => item.categoria))].sort((a, b) => a.localeCompare(b, "es-AR"));
 }
 
-function mapSupabaseRow(row: z.infer<typeof supabaseProductRowSchema>): Producto {
-  return productoSchema.parse({ id: row.id, slug: row.slug, nombre: row.name, descripcion: row.description, precioCents: row.price_cents, moneda: row.currency, imagenes: row.images, stock: row.stock, categoria: row.category, tags: row.tags, activo: row.active, canjeConPuntos: row.points_enabled, puntosCanje: row.points_cost ?? null });
+function mapRow(row: z.infer<typeof productRowSchema>): Producto {
+  return productoSchema.parse({
+    id: row.id,
+    slug: row.slug,
+    nombre: row.name,
+    descripcion: row.description,
+    precioCents: row.price_cents,
+    moneda: row.currency,
+    imagenes: row.images,
+    stock: row.stock,
+    categoria: row.category,
+    tags: row.tags,
+    activo: row.active,
+    canjeConPuntos: row.points_enabled,
+    puntosCanje: row.points_cost ?? null,
+  });
 }
 
-async function fetchAllProductosFromSupabase(): Promise<Producto[]> {
-  const client = requireSupabaseAnonServerClient() as any;
-  const { data, error } = await client.from("products").select("id, slug, name, description, price_cents, currency, images, stock, category, tags, active, points_enabled, points_cost");
-  if (error) throw new Error(`Error leyendo catálogo desde Supabase (tabla products): ${error.message}`);
-  const rowsParsed = z.array(supabaseProductRowSchema).safeParse(data ?? []);
-  if (!rowsParsed.success) throw new Error("Supabase devolvió filas incompatibles con el schema de productos.");
-  return rowsParsed.data.map(mapSupabaseRow);
+async function fetchAllProductosFromInstant(): Promise<Producto[]> {
+  const db = requireInstantAdminClient();
+  const result = await db.query({ products: {} });
+  const rowsParsed = z.array(productRowSchema).safeParse((result as { products?: unknown }).products ?? []);
+  if (!rowsParsed.success) throw new Error("InstantDB devolvio filas incompatibles con el schema de productos.");
+  return rowsParsed.data.map(mapRow);
 }
 
 export async function listCatalogoProductos(filters: ProductoFiltro = {}): Promise<CatalogoListado> {
-  const mapped = await fetchAllProductosFromSupabase();
+  const mapped = await fetchAllProductosFromInstant();
   const items = applyFilters(mapped, filters);
-  return { items, total: items.length, categorias: categoriasFromItems(mapped), source: "supabase", filters, warnings: mapped.length === 0 ? ["No hay productos en la tabla products de Supabase."] : [] };
+  return {
+    items,
+    total: items.length,
+    categorias: categoriasFromItems(mapped),
+    source: "instantdb",
+    filters,
+    warnings: mapped.length === 0 ? ["No hay productos en la entidad products de InstantDB."] : [],
+  };
 }
 
 export async function getCatalogoProductoBySlug(slug: string): Promise<Producto | null> {
   const cleanSlug = slug.trim();
   if (!cleanSlug) return null;
-  const client = requireSupabaseAnonServerClient() as any;
-  const { data, error } = await client.from("products").select("id, slug, name, description, price_cents, currency, images, stock, category, tags, active, points_enabled, points_cost").eq("slug", cleanSlug).maybeSingle();
-  if (error) throw new Error(`Error leyendo producto ${cleanSlug} desde Supabase: ${error.message}`);
-  if (!data) return null;
-  return mapSupabaseRow(supabaseProductRowSchema.parse(data));
+  const all = await fetchAllProductosFromInstant();
+  return all.find((item) => item.slug === cleanSlug) ?? null;
 }

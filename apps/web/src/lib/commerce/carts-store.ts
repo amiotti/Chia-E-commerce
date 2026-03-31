@@ -1,43 +1,54 @@
-import "server-only";
+﻿import "server-only";
 import { z } from "zod";
 import { cartItemSchema, cartSnapshotSchema, type CartItem } from "./types";
-import { requireSupabaseServiceClient } from "@/lib/supabase/server";
+import { requireInstantAdminClient } from "@/lib/instant/server";
+
+const cartRowSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  items: z.unknown().optional(),
+  updated_at: z.string().optional(),
+});
+
+async function readRawCarts() {
+  const db = requireInstantAdminClient();
+  const result = await db.query({ carts: {} });
+  const parsed = z.array(cartRowSchema).safeParse((result as { carts?: unknown }).carts ?? []);
+  if (!parsed.success) throw new Error("La entidad carts devolvio filas invalidas en InstantDB.");
+  return parsed.data;
+}
 
 export async function getCartByUserId(userId: string) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client.from("carts").select("user_id, items, updated_at").eq("user_id", userId).maybeSingle();
-
-  if (error) {
-    throw new Error(`Error leyendo carrito en Supabase: ${error.message}`);
-  }
+  const carts = await readRawCarts();
+  const data = carts.find((row) => row.user_id === userId);
   if (!data) return null;
 
-  const parsedItems = z.array(cartItemSchema).safeParse((data as { items?: unknown }).items ?? []);
+  const parsedItems = z.array(cartItemSchema).safeParse(data.items ?? []);
   if (!parsedItems.success) {
-    throw new Error("El carrito en Supabase tiene items inválidos.");
+    throw new Error("El carrito en InstantDB tiene items invalidos.");
   }
 
   return cartSnapshotSchema.parse({
-    userId: String((data as { user_id?: string }).user_id ?? userId),
+    userId: data.user_id,
     items: parsedItems.data,
-    updatedAt: String((data as { updated_at?: string }).updated_at ?? new Date().toISOString()),
+    updatedAt: data.updated_at ?? new Date().toISOString(),
   });
 }
 
 export async function setCartByUserId(userId: string, items: CartItem[]) {
   const safeItems = z.array(cartItemSchema).parse(items).filter((item) => item.qty > 0);
-  const client = requireSupabaseServiceClient() as any;
+  const db = requireInstantAdminClient();
 
-  const payload = {
-    user_id: userId,
-    items: safeItems,
-    updated_at: new Date().toISOString(),
-  };
+  const current = await getCartByUserId(userId);
+  const cartId = current?.userId ?? userId;
 
-  const { error } = await client.from("carts").upsert(payload, { onConflict: "user_id" });
-  if (error) {
-    throw new Error(`Error guardando carrito en Supabase: ${error.message}`);
-  }
+  await db.transact(
+    db.tx.carts[cartId].update({
+      user_id: userId,
+      items: safeItems,
+      updated_at: new Date().toISOString(),
+    }),
+  );
 
   return getCartByUserId(userId);
 }

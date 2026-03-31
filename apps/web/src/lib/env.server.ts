@@ -5,23 +5,23 @@ const optionalEnvString = z.preprocess(
   z.string().optional(),
 );
 
-const supabaseEnvSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: optionalEnvString.pipe(z.url().optional()),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalEnvString,
-  SUPABASE_SERVICE_ROLE_KEY: optionalEnvString,
+const instantEnvSchema = z.object({
+  NEXT_PUBLIC_INSTANT_APP_ID: optionalEnvString,
+  INSTANT_APP_ADMIN_TOKEN: optionalEnvString,
+  INSTANT_API_URI: optionalEnvString.pipe(z.url().optional()),
 });
 
-export type SupabaseEnvStatus = {
+export type InstantEnvStatus = {
   configuredPublic: boolean;
-  configuredServer: boolean;
+  configuredAdmin: boolean;
   issues: string[];
 };
 
-export function readSupabaseEnv() {
-  const parsed = supabaseEnvSchema.safeParse({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+export function readInstantEnv() {
+  const parsed = instantEnvSchema.safeParse({
+    NEXT_PUBLIC_INSTANT_APP_ID: process.env.NEXT_PUBLIC_INSTANT_APP_ID,
+    INSTANT_APP_ADMIN_TOKEN: process.env.INSTANT_APP_ADMIN_TOKEN,
+    INSTANT_API_URI: process.env.INSTANT_API_URI,
   });
 
   if (!parsed.success) {
@@ -29,31 +29,31 @@ export function readSupabaseEnv() {
       data: null,
       status: {
         configuredPublic: false,
-        configuredServer: false,
+        configuredAdmin: false,
         issues: parsed.error.issues.map((issue) => issue.message),
-      } satisfies SupabaseEnvStatus,
+      } satisfies InstantEnvStatus,
     };
   }
 
   const data = parsed.data;
-  const configuredPublic = Boolean(data.NEXT_PUBLIC_SUPABASE_URL && data.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  const configuredServer = configuredPublic && Boolean(data.SUPABASE_SERVICE_ROLE_KEY);
+  const configuredPublic = Boolean(data.NEXT_PUBLIC_INSTANT_APP_ID);
+  const configuredAdmin = configuredPublic && Boolean(data.INSTANT_APP_ADMIN_TOKEN);
 
   const issues: string[] = [];
   if (!configuredPublic) {
-    issues.push("Faltan NEXT_PUBLIC_SUPABASE_URL y/o NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local");
+    issues.push("Falta NEXT_PUBLIC_INSTANT_APP_ID en .env.local");
   }
-  if (configuredPublic && !data.SUPABASE_SERVICE_ROLE_KEY) {
-    issues.push("Falta SUPABASE_SERVICE_ROLE_KEY para operaciones server privilegiadas");
+  if (configuredPublic && !data.INSTANT_APP_ADMIN_TOKEN) {
+    issues.push("Falta INSTANT_APP_ADMIN_TOKEN para operaciones server privilegiadas");
   }
 
   return {
     data,
     status: {
       configuredPublic,
-      configuredServer,
+      configuredAdmin,
       issues,
-    } satisfies SupabaseEnvStatus,
+    } satisfies InstantEnvStatus,
   };
 }
 

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@chia/shared": "file:../../packages/shared",
-    "@supabase/supabase-js": "^2.57.4",
+    "@instantdb/admin": "^0.22.177",
     "@vercel/analytics": "^1.6.1",
     "next": "16.1.0",
     "react": "19.2.0",

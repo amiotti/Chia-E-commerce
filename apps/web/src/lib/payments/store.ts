@@ -1,7 +1,7 @@
-import "server-only";
+﻿import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { requireSupabaseServiceClient } from "@/lib/supabase/server";
+import { requireInstantAdminClient } from "@/lib/instant/server";
 
 export const paymentRecordSchema = z.object({
   id: z.string(),
@@ -19,9 +19,22 @@ export const paymentRecordSchema = z.object({
 
 export type PaymentRecord = z.infer<typeof paymentRecordSchema>;
 
+const dbRowSchema = z.object({
+  id: z.string(),
+  order_id: z.string(),
+  provider: z.string(),
+  provider_payment_id: z.string().nullable().optional(),
+  status: z.string(),
+  amount_cents: z.number().int().nonnegative(),
+  currency: z.string(),
+  last_event_id: z.string().nullable().optional(),
+  raw_payload: z.unknown().nullable().optional(),
+  created_at: z.string(),
+  updated_at: z.string().optional(),
+});
+
 function toDbRow(payment: PaymentRecord) {
   return {
-    id: payment.id,
     order_id: payment.orderId,
     provider: payment.provider,
     provider_payment_id: payment.providerPaymentId,
@@ -34,20 +47,6 @@ function toDbRow(payment: PaymentRecord) {
     updated_at: payment.updatedAt,
   };
 }
-
-const dbRowSchema = z.object({
-  id: z.string().uuid().or(z.string()),
-  order_id: z.string(),
-  provider: z.string(),
-  provider_payment_id: z.string().nullable().optional(),
-  status: z.string(),
-  amount_cents: z.number().int().nonnegative(),
-  currency: z.string(),
-  last_event_id: z.string().nullable().optional(),
-  raw_payload: z.unknown().nullable().optional(),
-  created_at: z.string(),
-  updated_at: z.string().optional(),
-});
 
 function fromDbRow(row: z.infer<typeof dbRowSchema>): PaymentRecord {
   return paymentRecordSchema.parse({
@@ -65,6 +64,14 @@ function fromDbRow(row: z.infer<typeof dbRowSchema>): PaymentRecord {
   });
 }
 
+async function readRawPayments() {
+  const db = requireInstantAdminClient();
+  const result = await db.query({ payments: {} });
+  const parsed = z.array(dbRowSchema).safeParse((result as { payments?: unknown }).payments ?? []);
+  if (!parsed.success) throw new Error("La entidad payments devolvio filas invalidas en InstantDB.");
+  return parsed.data;
+}
+
 export async function createPaymentRecord(input: Omit<PaymentRecord, "id" | "createdAt" | "updatedAt">) {
   const now = new Date().toISOString();
   const payment = paymentRecordSchema.parse({
@@ -74,23 +81,15 @@ export async function createPaymentRecord(input: Omit<PaymentRecord, "id" | "cre
     updatedAt: now,
   });
 
-  const client = requireSupabaseServiceClient() as any;
-  const { error } = await client.from("payments").insert(toDbRow(payment));
-  if (error) throw new Error(`Error creando payment en Supabase: ${error.message}`);
+  const db = requireInstantAdminClient();
+  await db.transact(db.tx.payments[payment.id].update(toDbRow(payment)));
   return payment;
 }
 
 export async function updatePaymentRecord(id: string, patch: Partial<PaymentRecord>) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data: currentData, error: currentError } = await client
-    .from("payments")
-    .select("id, order_id, provider, provider_payment_id, status, amount_cents, currency, last_event_id, raw_payload, created_at, updated_at")
-    .eq("id", id)
-    .maybeSingle();
-  if (currentError) throw new Error(`Error leyendo payment en Supabase: ${currentError.message}`);
-  if (!currentData) return null;
+  const current = await getPaymentRecordById(id);
+  if (!current) return null;
 
-  const current = fromDbRow(dbRowSchema.parse(currentData));
   const next = paymentRecordSchema.parse({
     ...current,
     ...patch,
@@ -98,60 +97,35 @@ export async function updatePaymentRecord(id: string, patch: Partial<PaymentReco
     updatedAt: new Date().toISOString(),
   });
 
-  const { error } = await client.from("payments").upsert(toDbRow(next), { onConflict: "id" });
-  if (error) throw new Error(`Error actualizando payment en Supabase: ${error.message}`);
+  const db = requireInstantAdminClient();
+  await db.transact(db.tx.payments[id].update(toDbRow(next)));
   return next;
 }
 
 export async function getPaymentRecordById(id: string) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client
-    .from("payments")
-    .select("id, order_id, provider, provider_payment_id, status, amount_cents, currency, last_event_id, raw_payload, created_at, updated_at")
-    .eq("id", id)
-    .maybeSingle();
-  if (error) throw new Error(`Error leyendo payment por id en Supabase: ${error.message}`);
-  if (!data) return null;
-  return fromDbRow(dbRowSchema.parse(data));
+  const rows = await readRawPayments();
+  const found = rows.find((row) => row.id === id);
+  return found ? fromDbRow(found) : null;
 }
 
 export async function listPaymentsByOrder(orderId: string) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client
-    .from("payments")
-    .select("id, order_id, provider, provider_payment_id, status, amount_cents, currency, last_event_id, raw_payload, created_at, updated_at")
-    .eq("order_id", orderId)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(`Error listando payments en Supabase: ${error.message}`);
-  const parsed = z.array(dbRowSchema).safeParse(data ?? []);
-  if (!parsed.success) throw new Error("La tabla payments devolvió filas inválidas.");
-  return parsed.data.map(fromDbRow);
+  const rows = await readRawPayments();
+  return rows
+    .filter((row) => row.order_id === orderId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map(fromDbRow);
 }
 
 export async function findPaymentByProviderPaymentId(provider: "mercadopago" | "galiopay", providerPaymentId: string) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client
-    .from("payments")
-    .select("id, order_id, provider, provider_payment_id, status, amount_cents, currency, last_event_id, raw_payload, created_at, updated_at")
-    .eq("provider", provider)
-    .eq("provider_payment_id", providerPaymentId)
-    .maybeSingle();
-  if (error) throw new Error(`Error buscando payment por provider_payment_id: ${error.message}`);
-  if (!data) return null;
-  return fromDbRow(dbRowSchema.parse(data));
+  const rows = await readRawPayments();
+  const found = rows.find((row) => row.provider === provider && row.provider_payment_id === providerPaymentId);
+  return found ? fromDbRow(found) : null;
 }
 
 export async function findLatestPaymentByOrder(provider: "mercadopago" | "galiopay", orderId: string) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client
-    .from("payments")
-    .select("id, order_id, provider, provider_payment_id, status, amount_cents, currency, last_event_id, raw_payload, created_at, updated_at")
-    .eq("provider", provider)
-    .eq("order_id", orderId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(`Error buscando payment por orden/proveedor en Supabase: ${error.message}`);
-  if (!data) return null;
-  return fromDbRow(dbRowSchema.parse(data));
+  const rows = await readRawPayments();
+  const found = rows
+    .filter((row) => row.provider === provider && row.order_id === orderId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  return found ? fromDbRow(found) : null;
 }

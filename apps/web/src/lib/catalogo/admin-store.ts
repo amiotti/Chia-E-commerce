@@ -1,11 +1,9 @@
-import "server-only";
+﻿import "server-only";
 import { productoCreateSchema, productoSchema, productoUpdateSchema, type Producto } from "@chia/shared";
 import { z } from "zod";
-import { requireSupabaseServiceClient } from "@/lib/supabase/server";
+import { requireInstantAdminClient } from "@/lib/instant/server";
 
-const PRODUCT_SELECT = "id, slug, name, description, price_cents, currency, images, stock, category, tags, active, points_enabled, points_cost";
-
-const supabaseProductRowSchema = z.object({
+const productRowSchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
@@ -25,9 +23,8 @@ function createAdminProductId() {
   return `adm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function toSupabaseProductRow(producto: Producto) {
+function toRow(producto: Producto) {
   return {
-    id: producto.id,
     slug: producto.slug,
     name: producto.nombre,
     description: producto.descripcion,
@@ -43,7 +40,7 @@ function toSupabaseProductRow(producto: Producto) {
   };
 }
 
-function fromSupabaseProductRow(row: z.infer<typeof supabaseProductRowSchema>): Producto {
+function fromRow(row: z.infer<typeof productRowSchema>): Producto {
   return productoSchema.parse({
     id: row.id,
     slug: row.slug,
@@ -65,34 +62,36 @@ function isManagedAdminProductId(id: string) {
   return id.startsWith("adm_") || id.startsWith("imp_");
 }
 
+async function readRawProducts() {
+  const db = requireInstantAdminClient();
+  const result = await db.query({ products: {} });
+  const parsed = z.array(productRowSchema).safeParse((result as { products?: unknown }).products ?? []);
+  if (!parsed.success) throw new Error("La entidad products devolvio filas incompatibles con el schema esperado.");
+  return parsed.data;
+}
+
 async function getProductoById(id: string) {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client.from("products").select(PRODUCT_SELECT).eq("id", id).maybeSingle();
-  if (error) throw new Error(`No se pudo leer el producto ${id} desde Supabase: ${error.message}`);
-  if (!data) throw new Error("Producto no encontrado.");
-  return fromSupabaseProductRow(supabaseProductRowSchema.parse(data));
+  const rows = await readRawProducts();
+  const found = rows.find((row) => row.id === id);
+  if (!found) throw new Error("Producto no encontrado.");
+  return fromRow(found);
 }
 
 export async function readAdminProductos(): Promise<Producto[]> {
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client.from("products").select(PRODUCT_SELECT).order("slug", { ascending: true });
-  if (error) throw new Error(`Error leyendo productos desde Supabase: ${error.message}`);
-  const parsed = z.array(supabaseProductRowSchema).safeParse(data ?? []);
-  if (!parsed.success) throw new Error("La tabla products devolvió filas incompatibles con el schema esperado.");
-  return parsed.data.map(fromSupabaseProductRow);
+  const rows = await readRawProducts();
+  return rows.map(fromRow).sort((a, b) => a.slug.localeCompare(b.slug, "es-AR"));
 }
 
 export async function createManualAdminProducto(input: unknown): Promise<Producto> {
   const parsed = productoCreateSchema.parse(input);
-  const producto = productoSchema.parse({ id: createAdminProductId(), ...parsed });
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client
-    .from("products")
-    .upsert(toSupabaseProductRow(producto), { onConflict: "slug" })
-    .select(PRODUCT_SELECT)
-    .single();
-  if (error) throw new Error(`No se pudo guardar el producto en Supabase: ${error.message}`);
-  return fromSupabaseProductRow(supabaseProductRowSchema.parse(data));
+  const db = requireInstantAdminClient();
+  const rows = await readRawProducts();
+  const existing = rows.find((row) => row.slug === parsed.slug);
+  const productId = existing?.id ?? createAdminProductId();
+
+  const producto = productoSchema.parse({ id: productId, ...parsed });
+  await db.transact(db.tx.products[productId].update(toRow(producto)));
+  return producto;
 }
 
 export async function updateAdminProducto(input: unknown): Promise<Producto> {
@@ -114,37 +113,34 @@ export async function updateAdminProducto(input: unknown): Promise<Producto> {
     puntosCanje: parsed.puntosCanje ?? current.puntosCanje,
   });
 
-  const client = requireSupabaseServiceClient() as any;
-  const { data, error } = await client
-    .from("products")
-    .update(toSupabaseProductRow(producto))
-    .eq("id", parsed.id)
-    .select(PRODUCT_SELECT)
-    .single();
-  if (error) throw new Error(`No se pudo actualizar el producto en Supabase: ${error.message}`);
-  return fromSupabaseProductRow(supabaseProductRowSchema.parse(data));
+  const db = requireInstantAdminClient();
+  await db.transact(db.tx.products[parsed.id].update(toRow(producto)));
+  return producto;
 }
 
 export type ImportMode = "merge" | "replace";
 
 export async function importAdminProductos(items: Producto[], mode: ImportMode) {
-  const client = requireSupabaseServiceClient() as any;
+  const db = requireInstantAdminClient();
+
   if (mode === "replace") {
-    const { data: idsData, error: idsError } = await client.from("products").select("id");
-    if (idsError) throw new Error(`No se pudieron leer IDs de products para replace: ${idsError.message}`);
-    const idsToDelete = (idsData ?? [])
-      .map((row: unknown) => String((row as { id?: string }).id ?? ""))
-      .filter((id: string) => id && isManagedAdminProductId(id));
+    const existing = await readRawProducts();
+    const idsToDelete = existing.map((row) => row.id).filter((id) => id && isManagedAdminProductId(id));
     if (idsToDelete.length > 0) {
-      const { error: deleteError } = await client.from("products").delete().in("id", idsToDelete);
-      if (deleteError) throw new Error(`No se pudieron borrar productos administrados en replace: ${deleteError.message}`);
+      await db.transact(idsToDelete.map((id) => db.tx.products[id].delete()));
     }
   }
+
   if (items.length > 0) {
-    const rows = items.map(toSupabaseProductRow);
-    const { error: upsertError } = await client.from("products").upsert(rows, { onConflict: "slug" });
-    if (upsertError) throw new Error(`No se pudieron importar productos a Supabase: ${upsertError.message}`);
+    await db.transact(items.map((item) => db.tx.products[item.id].update(toRow(item))));
   }
+
   const totalAfter = (await readAdminProductos()).length;
-  return { mode, importedCount: items.length, totalAfter, slugs: items.map((item) => item.slug), persistedInSupabase: true };
+  return {
+    mode,
+    importedCount: items.length,
+    totalAfter,
+    slugs: items.map((item) => item.slug),
+    persistedInInstantDB: true,
+  };
 }
